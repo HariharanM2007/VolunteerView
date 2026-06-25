@@ -18,9 +18,9 @@ public class RegisterDto {
     @NotBlank
     private String fullName;
 
-    
     private String phoneNumber;
     
+    @NotBlank
     private Role user; 
 
     public String getUsername() {
