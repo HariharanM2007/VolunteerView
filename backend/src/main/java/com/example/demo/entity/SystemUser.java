@@ -33,8 +33,9 @@ public class SystemUser {
 
     }
 
-    public SystemUser(){
-        this 
+    public SystemUser(Long id, String username, String email, String passwordHash, String fullName, String phoneNumber, Role user, Userstatus use){
+        this.id = id;
+
     }
 
     public Long getId(){
