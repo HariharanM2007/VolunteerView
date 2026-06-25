@@ -1,5 +1,6 @@
 package com.example.demo.service;
 
+import com.example.demo.dto.RegisterDto;
 import com.example.demo.entity.SystemUser;
 import com.example.demo.repository.SystemUserRepository;
 
@@ -9,5 +10,9 @@ public class UserService {
         this.repo=repo;
     }
 
-    public SystemUser create
+    public SystemUser createUser(RegisterDto dto){
+        SystemUser user = new SystemUser();
+
+        user.setEmail(dto);
+    }
 }
