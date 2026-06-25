@@ -3,6 +3,7 @@ package com.example.demo.controller;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import com.example.demo.dto.RegisterDto;
+import com.example.demo.entity.SystemUser;
 import com.example.demo.service.UserService;
 
 public class UserController {
@@ -13,6 +14,7 @@ public class UserController {
     }
 
     public SystemUser createUser(@RequestBody RegisterDto dto){
+        
         return service.createUser(dto);
     }
 
