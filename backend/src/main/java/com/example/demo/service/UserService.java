@@ -18,7 +18,8 @@ public class UserService {
         user.setPasswordHash(dto.getPassword());
         user.setFullName(dto.getFullName());
         user.setPhoneNumber(dto.getPhoneNumber());
+        user.setUser(dto.getUser());
 
-        
+        return repo.save(user);
     }
 }
