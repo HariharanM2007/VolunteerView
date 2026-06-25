@@ -11,5 +11,14 @@ public class RegisterDto {
     private String phoneNumber;
     private Role user;
 
-    public RegisterDto(String username, String email, String password, String fullName, String phoneNumber, )
+    public RegisterDto(String username, String email, String password, String fullName, String phoneNumber, Role user){
+        this.username=username;
+        this.email=email;
+        this.password=password;
+        this.fullName=fullName;
+        this.phoneNumber=phoneNumber;
+        this.user=user;
+    }
+
+    
 }
