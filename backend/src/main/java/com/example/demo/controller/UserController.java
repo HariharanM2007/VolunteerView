@@ -1,5 +1,6 @@
 package com.example.demo.controller;
 
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import com.example.demo.dto.RegisterDto;
@@ -13,9 +14,11 @@ public class UserController {
         this.service=service;
     }
 
+    @PostMapping
     public SystemUser createUser(@RequestBody RegisterDto dto){
         
         return service.createUser(dto);
+
     }
 
 
