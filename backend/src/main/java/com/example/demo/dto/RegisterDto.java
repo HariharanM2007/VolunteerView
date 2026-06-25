@@ -80,5 +80,4 @@ public class RegisterDto {
         this.user=user;
     }
 
-    
 }
