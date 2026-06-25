@@ -13,11 +13,12 @@ public class UserService {
     public SystemUser createUser(RegisterDto dto){
         SystemUser user = new SystemUser();
 
-        user.setUsername(dto.setUsername(null););
+        user.setUsername(dto.getUsername());
         user.setEmail(dto.getEmail());
         user.setPasswordHash(dto.getPassword());
         user.setFullName(dto.getFullName());
         user.setPhoneNumber(dto.getPhoneNumber());
 
+        
     }
 }
