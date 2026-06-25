@@ -24,6 +24,5 @@ public class UserController {
         return service.createUser(dto);
 
     }
-
-
+    
 }

@@ -79,5 +79,4 @@ public class RegisterDto {
         this.phoneNumber=phoneNumber;
         this.user=user;
     }
-
 }
