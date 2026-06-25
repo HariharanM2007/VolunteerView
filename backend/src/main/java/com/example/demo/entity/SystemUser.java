@@ -33,6 +33,10 @@ public class SystemUser {
 
     }
 
+    public SystemUser(){
+        this 
+    }
+
     public Long getId(){
         return id;
     }
