@@ -11,10 +11,16 @@ public class RegisterDto {
 
     @NotBlank
     private String email;
-    
+
+    @NotBlank
     private String password;
+    
+    @NotBlank
     private String fullName;
+
+    
     private String phoneNumber;
+    
     private Role user; 
 
     public String getUsername() {
