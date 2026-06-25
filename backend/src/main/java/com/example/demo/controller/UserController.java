@@ -1,5 +1,8 @@
 package com.example.demo.controller;
 
+import org.springframework.web.bind.annotation.RequestBody;
+
+import com.example.demo.dto.RegisterDto;
 import com.example.demo.service.UserService;
 
 public class UserController {
@@ -9,7 +12,9 @@ public class UserController {
         this.service=service;
     }
 
-    public SystemUser createUser(@Reques)
+    public SystemUser createUser(@RequestBody RegisterDto dto){
+        return service.createUser(dto);
+    }
 
 
 }
