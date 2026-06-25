@@ -33,8 +33,15 @@ public class SystemUser {
 
     }
 
-    public SystemUser(Long id, String username, String email, String passwordHash, String fullName, String phoneNumber, Role user, Userstatus use){
+    public SystemUser(Long id, String username, String email, String passwordHash, String fullName, String phoneNumber, Role user, UserStatus use){
         this.id = id;
+        this.username=username;
+        this.email=email;
+        this.passwordHash=passwordHash;
+        this.fullName=fullName;
+        this.phoneNumber=phoneNumber;
+        this.user=user;
+        this.use=use;
 
     }
 
