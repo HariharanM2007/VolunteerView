@@ -11,5 +11,5 @@ public class RegisterDto {
     private String phoneNumber;
     private Role user;
 
-    
+    public RegisterDto(String username, String email, String password, String fullName, String phoneNumber, )
 }
