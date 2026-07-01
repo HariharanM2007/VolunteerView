@@ -1,5 +1,7 @@
 package com.example.demo.controller;
 
+import java.util.List;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -26,6 +28,9 @@ public class UserController {
     }
     
     public ResponseEntity<List<SystemUser>> getAllUsers(){
+
+        List<SystemUser> users = service.getAllUsers();
+        
         
     }
 
