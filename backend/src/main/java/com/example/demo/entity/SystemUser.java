@@ -26,22 +26,22 @@ public class SystemUser {
     private String phoneNumber;
 
     @Enumerated(EnumType.STRING)
-    private Role Roleuser;
+    private Role RoleUser;
     private UserStatus UserStatusUser;
 
     public SystemUser(){
 
     }
 
-    public SystemUser(Long id, String username, String email, String passwordHash, String fullName, String phoneNumber, Role user, UserStatus use){
+    public SystemUser(Long id, String username, String email, String passwordHash, String fullName, String phoneNumber, Role RoleUser, UserStatus UserStatusUser){
         this.id = id;
         this.username=username;
         this.email=email;
         this.passwordHash=passwordHash;
         this.fullName=fullName;
         this.phoneNumber=phoneNumber;
-        this.user=user;
-        this.use=use;
+        this.RoleUser=RoleUser;
+        this.UserStatusUser=UserStatusUser;
 
     }
 
@@ -88,17 +88,17 @@ public class SystemUser {
     }
 
     public Role getUser(){
-        return user;
+        return RoleUser;
     }
     public void setUser(Role user){
-        this.user=user;
+        this.RoleUser=user;
     }
 
     public UserStatus getUse() {
-        return use;
+        return UserStatusUser;
     }
 
     public void setUse(UserStatus use) {
-        this.use = use;
+        this.UserStatusUser = use;
     }    
 }
