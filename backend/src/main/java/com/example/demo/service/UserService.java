@@ -11,15 +11,15 @@ public class UserService {
     }
 
     public SystemUser createUser(RegisterDto dto){
-        SystemUser Role = new SystemUser();
+        SystemUser RoleUser = new SystemUser();
 
-        user.setUsername(dto.getUsername());
-        user.setEmail(dto.getEmail());
-        user.setPasswordHash(dto.getPassword());
-        user.setFullName(dto.getFullName());
-        user.setPhoneNumber(dto.getPhoneNumber());
-        user.setUser(dto.getUser());
+        RoleUser.setUsername(dto.getUsername());
+        RoleUser.setEmail(dto.getEmail());
+        RoleUser.setPasswordHash(dto.getPassword());
+        RoleUser.setFullName(dto.getFullName());
+        RoleUser.setPhoneNumber(dto.getPhoneNumber());
+        RoleUser.setUser(dto.getUser());
 
-        return repo.save(user);
+        return repo.save(RoleUser);
     }
 }
