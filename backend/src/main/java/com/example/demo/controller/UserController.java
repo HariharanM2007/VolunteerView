@@ -39,7 +39,6 @@ public class UserController {
         
     }
 
-    public ResponseEntity<SystemUser> 
 
 
 }
