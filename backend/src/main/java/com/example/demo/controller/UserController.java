@@ -35,11 +35,11 @@ public class UserController {
 
         List<SystemUser> users = service.getAllUsers();
 
-        return ResponseEntity.status(HttpStatus.OK)
+        return ResponseEntity.status(HttpStatus.OK).body(users);
         
     }
 
-    public ResponseEntity<SystemUser
+    public ResponseEntity<SystemUser> 
 
 
 }

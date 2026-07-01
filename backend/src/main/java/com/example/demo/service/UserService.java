@@ -1,5 +1,7 @@
 package com.example.demo.service;
 
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 
 import com.example.demo.dto.RegisterDto;
@@ -24,5 +26,10 @@ public class UserService {
         RoleUser.setUser(dto.getUser());
 
         return repo.save(RoleUser);
+    }
+
+    public List<SystemUser> getAllUsers() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getAllUsers'");
     }
 }
