@@ -21,7 +21,7 @@ public class RegisterDto {
     private String phoneNumber;
     
     @NotBlank
-    private Role user; 
+    private Role RoleUser; 
 
     public String getUsername() {
         return username;
@@ -64,11 +64,11 @@ public class RegisterDto {
     }
 
     public Role getUser() {
-        return user;
+        return RoleUser;
     }
 
-    public void setUser(Role user) {
-        this.user = user;
+    public void setUser(Role RoleUser) {
+        this.RoleUser = RoleUser;
     }
 
     public RegisterDto(String username, String email, String password, String fullName, String phoneNumber, Role user){
@@ -77,6 +77,6 @@ public class RegisterDto {
         this.password=password;
         this.fullName=fullName;
         this.phoneNumber=phoneNumber;
-        this.user=user;
+        this.RoleUser=RoleUser;
     }
 }
