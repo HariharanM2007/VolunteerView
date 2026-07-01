@@ -71,7 +71,7 @@ public class RegisterDto {
         this.RoleUser = RoleUser;
     }
 
-    public RegisterDto(String username, String email, String password, String fullName, String phoneNumber, Role user){
+    public RegisterDto(String username, String email, String password, String fullName, String phoneNumber, Role RoleUser){
         this.username=username;
         this.email=email;
         this.password=password;

@@ -11,7 +11,7 @@ public class UserService {
     }
 
     public SystemUser createUser(RegisterDto dto){
-        SystemUser user = new SystemUser();
+        SystemUser Role = new SystemUser();
 
         user.setUsername(dto.getUsername());
         user.setEmail(dto.getEmail());
