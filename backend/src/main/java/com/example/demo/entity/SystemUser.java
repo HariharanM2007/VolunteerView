@@ -26,8 +26,8 @@ public class SystemUser {
     private String phoneNumber;
 
     @Enumerated(EnumType.STRING)
-    private Role user;
-    private UserStatus use;
+    private Role Roleuser;
+    private UserStatus UserStatusUser;
 
     public SystemUser(){
 
