@@ -90,15 +90,15 @@ public class SystemUser {
     public Role getUser(){
         return RoleUser;
     }
-    public void setUser(Role user){
-        this.RoleUser=user;
+    public void setUser(Role RoleUser){
+        this.RoleUser=RoleUser;
     }
 
     public UserStatus getUse() {
         return UserStatusUser;
     }
 
-    public void setUse(UserStatus use) {
-        this.UserStatusUser = use;
+    public void setUse(UserStatus UserStatusUser) {
+        this.UserStatusUser = UserStatusUser;
     }    
 }
