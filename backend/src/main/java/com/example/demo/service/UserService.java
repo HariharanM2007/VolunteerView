@@ -43,7 +43,7 @@ public class UserService {
         user.setFullName(dto.getFullName());
         user.setPasswordHash(dto.getPassword());
         user.setEmail(dto.getEmail());
-        user.setRole(dto.getRole());
+        user.setUser(dto.getUser());
         
 
                 return repo.save(user);
