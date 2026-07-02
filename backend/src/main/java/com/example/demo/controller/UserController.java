@@ -38,6 +38,11 @@ public class UserController {
         
     }
 
+    @GetMapping
+    public List<SystemUser> getAllUsers() {
 
+        return service.getAllUsers();
+    
+    }
 
 }

@@ -29,7 +29,8 @@ public class UserService {
     }
 
     public List<SystemUser> getAllUsers() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getAllUsers'");
+        return repo.findAll();
     }
+
+    
 }
