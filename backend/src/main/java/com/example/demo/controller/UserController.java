@@ -28,15 +28,6 @@ public class UserController {
         
         return service.createUser(dto);
     }
-    
-    @GetMapping
-    public ResponseEntity<List<SystemUser>> getAllUsers(){
-
-        List<SystemUser> users = service.getAllUsers();
-
-        return ResponseEntity.status(HttpStatus.OK).body(users);
-        
-    }
 
     @GetMapping
     public List<SystemUser> getAllUsers() {
