@@ -6,6 +6,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class GlobalExceptionHandler {
     
-    public ResponseEntity<Map<String, Object>> h
+    public ResponseEntity<Map<String, Object>> handleValidation
 
 }
