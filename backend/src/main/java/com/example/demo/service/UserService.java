@@ -32,5 +32,26 @@ public class UserService {
         return repo.findAll();
     }
 
-    
+    public SystemUser getUser(Long id){
+        return repo.findById(id).orElseThrow(()-> new RuntimeException("User not found"));
+    }
+
+    public SystemUser UpdateUser(Long id,RegisterDto dto){
+        SystemUser user=getUser(id);
+
+        user.setUsername(dto.getUsername());
+        user.setFullName(dto.getFullName());
+        user.setPassword(dto.getPassword());
+        user.setEmail(dto.getEmail());
+        user.setRole(dto.getRole());
+        
+
+                return repo.save(user);
+        
+    }
+
+    public void DeleteUser(Long id){
+        SystemUser existingUser = getUser(id);
+        repo.delete(existingUser);
+    }
 }
