@@ -2,6 +2,7 @@ package com.example.demo.service;
 
 import java.util.List;
 
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.example.demo.dto.RegisterDto;
@@ -11,7 +12,9 @@ import com.example.demo.repository.SystemUserRepository;
 @Service
 public class UserService {
     public final SystemUserRepository repo;
-    public UserService(SystemUserRepository repo){
+    public final BCryptPasswordEncoder passwordEncoder;
+
+    public UserService(SystemUserRepository repo, B){
         this.repo=repo;
     }
 
