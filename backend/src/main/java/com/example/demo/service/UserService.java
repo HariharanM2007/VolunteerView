@@ -14,7 +14,8 @@ public class UserService {
     public final SystemUserRepository repo;
     public final BCryptPasswordEncoder passwordEncoder;
 
-    public UserService(SystemUserRepository repo, B){
+    public UserService(SystemUserRepository repo, BCryptPasswordEncoder passwordEncoder){
+        this.passwordEncoder=passwordEncoder;
         this.repo=repo;
     }
 
