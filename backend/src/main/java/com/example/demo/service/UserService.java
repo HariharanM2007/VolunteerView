@@ -54,4 +54,15 @@ public class UserService {
         SystemUser existingUser = getUser(id);
         repo.delete(existingUser);
     }
+
+    public SystemUser patchUser(Long id, RegisterDto dto){
+        SystemUser user = getUser(id);
+
+        if (dto.getPassword() != null) {
+            user.setPassword(dto.getPassword());
+        }
+        return repo.save(user);
+
+    }
+
 }

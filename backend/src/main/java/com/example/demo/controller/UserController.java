@@ -70,7 +70,7 @@ public class UserController {
     @PatchMapping("/{id}")
         public ResponseEntity<SystemUser> patchUser(
                 @PathVariable Long id,
-                @RequestBody RegisterDTO dto) {
+                @RequestBody RegisterDto dto) {
        
             SystemUser user = service.patchUser(id, dto);
        
