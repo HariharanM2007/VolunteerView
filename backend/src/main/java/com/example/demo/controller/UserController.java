@@ -20,7 +20,7 @@ import com.example.demo.service.UserService;
 @RestController
 @RequestMapping("/api/user")
 public class UserController {
-    
+
     public final UserService service;
 
     public UserController(UserService service){
@@ -28,7 +28,7 @@ public class UserController {
     }
 
     @PostMapping
-    public SystemUser createUser(@RequestBody RegisterDto dto){
+    public ResponseEntity<SystemUser> createUser(@RequestBody RegisterDto dto){
         
         return service.createUser(dto);
     }
