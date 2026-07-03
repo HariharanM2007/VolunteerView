@@ -1,7 +1,9 @@
 package com.example.demo.config;
 
+import org.springdoc.core.properties.SwaggerUiConfigProperties.Csrf;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configurers.CsrfConfigurer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
@@ -14,7 +16,9 @@ public BCryptPasswordEncoder passwordEncoder(){
 }
 
 @Bean
-public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception
+public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception{
+    http.csrf(CsrfConfigurer<HttpSecurity> csrf -> csrf.disable()).a
+}
 
     
 }
