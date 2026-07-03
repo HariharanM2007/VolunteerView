@@ -20,6 +20,7 @@ import com.example.demo.service.UserService;
 @RestController
 @RequestMapping("/api/user")
 public class UserController {
+    
     public final UserService service;
 
     public UserController(UserService service){
