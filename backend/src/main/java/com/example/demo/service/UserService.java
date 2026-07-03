@@ -59,7 +59,7 @@ public class UserService {
         SystemUser user = getUser(id);
 
         if (dto.getPassword() != null) {
-            user.setPassword(dto.getPassword());
+            user.setPasswordHash(dto.getPassword());
         }
         return repo.save(user);
 
