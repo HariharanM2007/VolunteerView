@@ -30,7 +30,9 @@ public class UserController {
     @PostMapping
     public ResponseEntity<SystemUser> createUser(@RequestBody RegisterDto dto){
         
-        return service.createUser(dto);
+        SystemUser user = service.createUser(dto)
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(USER);
     }
 
     @GetMapping
