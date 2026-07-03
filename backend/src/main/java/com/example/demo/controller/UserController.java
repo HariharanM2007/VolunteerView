@@ -30,21 +30,25 @@ public class UserController {
     @PostMapping
     public ResponseEntity<SystemUser> createUser(@RequestBody RegisterDto dto){
         
-        SystemUser user = service.createUser(dto)
+        SystemUser user = service.createUser(dto);
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(USER);
+        return ResponseEntity.status(HttpStatus.CREATED).body(user);
     }
 
     @GetMapping
     public ResponseEntity<List<SystemUser>>getAllUsers(){
+
         List<SystemUser>users=service.getAllUsers();
+        
         return ResponseEntity.status(HttpStatus.OK).body(users);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<SystemUser>getUser(@PathVariable Long id ){
+        
         SystemUser user =service.getUser(id);
-            return ResponseEntity.status(HttpStatus.OK).body(user);
+        
+        return ResponseEntity.status(HttpStatus.OK).body(user);
 
     }
 
