@@ -24,7 +24,7 @@ public class UserService {
 
         RoleUser.setUsername(dto.getUsername());
         RoleUser.setEmail(dto.getEmail());
-        RoleUser.setPasswordHash(passwordEncoder.encode(dto.getPassword()));
+        RoleUser.setPasswordHash(passwordEncoder.encode(dto.getPassword())  );
         RoleUser.setFullName(dto.getFullName());
         RoleUser.setPhoneNumber(dto.getPhoneNumber());
         RoleUser.setUser(dto.getUser());
