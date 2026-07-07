@@ -78,5 +78,4 @@ public class UserController {
                     .status(HttpStatus.OK)
                     .body(user);
         }
-
 }
