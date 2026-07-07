@@ -2,6 +2,7 @@ package com.example.demo.dto;
 
 import com.example.demo.enums.Role;
 
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 
 public class RegisterDto {
@@ -10,6 +11,7 @@ public class RegisterDto {
     private String username;
 
     @NotBlank
+    @Email(message = "email have to be in the proper format")
     private String email;
 
     @NotBlank
