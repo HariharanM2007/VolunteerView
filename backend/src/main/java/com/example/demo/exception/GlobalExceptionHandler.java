@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.RestController;
 public class GlobalExceptionHandler {
     
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Map<String,Object>>handleValidation()
+    public ResponseEntity<Map<String,Object>>handleValidation(MethodArgumentNotValidException ex){
+        
+    }
 
 }
