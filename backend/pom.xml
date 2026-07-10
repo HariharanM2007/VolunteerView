@@ -20,8 +20,6 @@
 
     <properties>
         <java.version>17</java.version>
-        <!-- Pin Lombok explicitly so its version is consistent everywhere it's referenced,
-             including the compiler plugin's annotationProcessorPaths below. -->
         <lombok.version>1.18.34</lombok.version>
     </properties>
 
@@ -39,8 +37,7 @@
             <artifactId>spring-boot-starter-data-jpa</artifactId>
         </dependency>
 
-        <!-- Security (starter already transitively brings core/config/web at matched
-             versions - no need to redeclare them individually, which risks version drift) -->
+        <!-- Security -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security</artifactId>
@@ -59,18 +56,20 @@
             <scope>runtime</scope>
         </dependency>
 
-        <!-- JWT - single, consistent version (0.12.5) declared once -->
+        <!-- JWT -->
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt-api</artifactId>
             <version>0.12.5</version>
         </dependency>
+
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt-impl</artifactId>
             <version>0.12.5</version>
             <scope>runtime</scope>
         </dependency>
+
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt-jackson</artifactId>
@@ -86,14 +85,14 @@
             <scope>provided</scope>
         </dependency>
 
-        <!-- OpenAPI / Swagger UI -->
+        <!-- Swagger -->
         <dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
             <version>2.6.0</version>
         </dependency>
 
-        <!-- Test dependencies -->
+        <!-- Testing -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
@@ -106,24 +105,11 @@
             <scope>test</scope>
         </dependency>
 
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-core</artifactId>
-            <version>5.11.0</version>
-            <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>org.testng</groupId>
-            <artifactId>testng</artifactId>
-            <version>7.7.1</version>
-            <scope>test</scope>
-        </dependency>
-
     </dependencies>
 
     <build>
         <plugins>
+
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
@@ -137,17 +123,11 @@
                 </configuration>
             </plugin>
 
-            <!-- Explicitly wire Lombok as an annotation processor. This is the key fix:
-                 without it, javac may silently skip Lombok's processor once other
-                 dependencies (springdoc, testng, mockito, etc.) are on the classpath,
-                 which is exactly what produced the "cannot find symbol: getX()/setX()/
-                 builder()" errors on every entity and DTO. -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
-                    <source>17</source>
-                    <target>17</target>
+                    <release>17</release>
                     <annotationProcessorPaths>
                         <path>
                             <groupId>org.projectlombok</groupId>
@@ -155,19 +135,6 @@
                             <version>${lombok.version}</version>
                         </path>
                     </annotationProcessorPaths>
-                </configuration>
-            </plugin>
-
-            <!-- Surefire — auto-detect JUnit and TestNG test classes, no testng.xml required -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.1.2</version>
-                <configuration>
-                    <includes>
-                        <include>**/*Tests.java</include>
-                        <include>**/*Test.java</include>
-                    </includes>
                 </configuration>
             </plugin>
 
