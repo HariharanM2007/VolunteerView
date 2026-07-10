@@ -1,84 +1,40 @@
 package com.example.demo.dto;
 
-import com.example.demo.enums.Role;
-
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class RegisterDto {
 
     @NotBlank
+    @Size(min = 3, max = 50)
     private String username;
 
     @NotBlank
-    @Email(message = "email have to be in the proper format")
+    @Email
     private String email;
 
     @NotBlank
+    @Size(min = 6, max = 100)
     private String password;
-    
+
     @NotBlank
+    @Size(max = 100)
     private String fullName;
 
+    @Size(max = 20)
     private String phoneNumber;
-    
+
     @NotBlank
-    private Role RoleUser; 
-
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public String getFullName() {
-        return fullName;
-    }
-
-    public void setFullName(String fullName) {
-        this.fullName = fullName;
-    }
-
-    public String getPhoneNumber() {
-        return phoneNumber;
-    }
-
-    public void setPhoneNumber(String phoneNumber) {
-        this.phoneNumber = phoneNumber;
-    }
-
-    public Role getUser() {
-        return RoleUser;
-    }
-
-    public void setUser(Role RoleUser) {
-        this.RoleUser = RoleUser;
-    }
-
-    public RegisterDto(String username, String email, String password, String fullName, String phoneNumber, Role RoleUser){
-        this.username=username;
-        this.email=email;
-        this.password=password;
-        this.fullName=fullName;
-        this.phoneNumber=phoneNumber;
-        this.RoleUser=RoleUser;
-    }
+    private String role;
 }
