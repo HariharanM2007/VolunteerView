@@ -1,104 +1,86 @@
 package com.example.demo.entity;
 
-import com.example.demo.enums.Role;
-import com.example.demo.enums.UserStatus;
-
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import java.time.LocalDateTime;
 
 @Entity
-@Table(name="system_users")
-
+@Table(name = "system_users")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class SystemUser {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-
     private Long id;
-    
-    @Column(unique = true)
+
+    @Column(name = "username", unique = true, nullable = false, length = 50)
     private String username;
 
+    @Column(name = "email", unique = true, nullable = false, length = 100)
     private String email;
 
+    @Column(name = "password_hash", nullable = false)
     private String passwordHash;
 
+    @Column(name = "full_name", nullable = false, length = 100)
     private String fullName;
 
+    @Column(name = "phone_number", length = 20)
     private String phoneNumber;
 
     @Enumerated(EnumType.STRING)
-    private Role RoleUser;
-    private UserStatus UserStatusUser;
+    @Column(name = "role", nullable = false, length = 30)
+    private Role role;
 
-    public SystemUser(){
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false, length = 30)
+    @Builder.Default
+    private UserStatus status = UserStatus.PENDING;
 
-    }
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "organization_id")
+    private Organization organization;
 
-    public SystemUser(Long id, String username, String email, String passwordHash, String fullName, String phoneNumber, Role RoleUser, UserStatus UserStatusUser){
-        this.id = id;
-        this.username=username;
-        this.email=email;
-        this.passwordHash=passwordHash;
-        this.fullName=fullName;
-        this.phoneNumber=phoneNumber;
-        this.RoleUser=RoleUser;
-        this.UserStatusUser=UserStatusUser;
+    @Column(name = "is_active", nullable = false)
+    @Builder.Default
+    private Boolean isActive = true;
 
-    }
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
 
-    public Long getId(){
-        return id;
-    }
-    public void setId(Long id){
-        this.id = id;
-    }
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
 
-    public String getUsername(){
-        return username;
-    }
-    public void setUsername(String username){
-        this.username=username;
+    @PrePersist
+    protected void onCreate() {
+        this.createdAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
     }
 
-    public String getEmail(){
-        return email;
-    }
-    public void setEmail(String email){
-        this.email=email;
+    @PreUpdate
+    protected void onUpdate() {
+        this.updatedAt = LocalDateTime.now();
     }
 
-    public String getPasswordHash(){
-        return passwordHash;
-    }
-    public void setPasswordHash(String passwordHash){
-        this.passwordHash=passwordHash;
-    }
-
-    public String getFullName(){
-        return fullName;
-    }
-    public void setFullName(String fullName){
-        this.fullName=fullName;
+    public enum Role {
+        PLATFORM_ADMIN,
+        ORGANIZATION_COORDINATOR,
+        VOLUNTEER
     }
 
-    public String getPhoneNumber(){
-        return phoneNumber;
+    public enum UserStatus {
+        PENDING,
+        APPROVED,
+        REJECTED,
+        DEACTIVATED
     }
-    public void setPhoneNumber(String phoneNumber){
-        this.phoneNumber=phoneNumber;
-    }
-
-    public Role getUser(){
-        return RoleUser;
-    }
-    public void setUser(Role RoleUser){
-        this.RoleUser=RoleUser;
-    }
-
-    public UserStatus getUse() {
-        return UserStatusUser;
-    }
-
-    public void setUse(UserStatus UserStatusUser) {
-        this.UserStatusUser = UserStatusUser;
-    }    
 }
