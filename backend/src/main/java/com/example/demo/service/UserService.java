@@ -1,72 +1,68 @@
 package com.example.demo.service;
 
+import com.example.demo.dto.UserResponseDto;
+import com.example.demo.entity.Organization;
+import com.example.demo.entity.SystemUser;
+import com.example.demo.exception.ResourceNotFoundException;
+import com.example.demo.repository.OrganizationRepository;
+import com.example.demo.repository.SystemUserRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.util.List;
 
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.stereotype.Service;
-
-import com.example.demo.dto.RegisterDto;
-import com.example.demo.entity.SystemUser;
-import com.example.demo.repository.SystemUserRepository;
-
 @Service
+@RequiredArgsConstructor
 public class UserService {
-    public final SystemUserRepository repo;
-    public final BCryptPasswordEncoder passwordEncoder;
 
-    public UserService(SystemUserRepository repo, BCryptPasswordEncoder passwordEncoder){
-        this.passwordEncoder=passwordEncoder;
-        this.repo=repo;
+    private final SystemUserRepository systemUserRepository;
+    private final OrganizationRepository organizationRepository;
+
+    @Transactional(readOnly = true)
+    public List<UserResponseDto> getAllUsers() {
+        return systemUserRepository.findAll().stream()
+                .map(this::mapToResponseDto)
+                .toList();
     }
 
-    public SystemUser createUser(RegisterDto dto){
-        SystemUser RoleUser = new SystemUser();
+    @Transactional
+    public UserResponseDto updateStatus(Long id, String statusStr) {
+        SystemUser user = systemUserRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("SystemUser", id));
 
-        RoleUser.setUsername(dto.getUsername());
-        RoleUser.setEmail(dto.getEmail());
-        RoleUser.setPasswordHash(passwordEncoder.encode(dto.getPassword())  );
-        RoleUser.setFullName(dto.getFullName());
-        RoleUser.setPhoneNumber(dto.getPhoneNumber());
-        RoleUser.setUser(dto.getUser());
+        user.setStatus(SystemUser.UserStatus.valueOf(statusStr.toUpperCase()));
 
-        return repo.save(RoleUser);
+        SystemUser saved = systemUserRepository.save(user);
+        return mapToResponseDto(saved);
     }
 
-    public List<SystemUser> getAllUsers() {
-        return repo.findAll();
+    @Transactional
+    public UserResponseDto assignOrganization(Long userId, Long orgId) {
+        SystemUser user = systemUserRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User", userId));
+
+        Organization organization = organizationRepository.findById(orgId)
+                .orElseThrow(() -> new ResourceNotFoundException("Organization", orgId));
+
+        user.setOrganization(organization);
+
+        SystemUser saved = systemUserRepository.save(user);
+        return mapToResponseDto(saved);
     }
 
-    public SystemUser getUser(Long id){
-        return repo.findById(id).orElseThrow(()-> new RuntimeException("User not found"));
+    private UserResponseDto mapToResponseDto(SystemUser user) {
+        return UserResponseDto.builder()
+                .id(user.getId())
+                .username(user.getUsername())
+                .email(user.getEmail())
+                .fullName(user.getFullName())
+                .phoneNumber(user.getPhoneNumber())
+                .role(user.getRole().name())
+                .status(user.getStatus().name())
+                .organizationId(user.getOrganization() != null ? user.getOrganization().getId() : null)
+                .organizationName(user.getOrganization() != null ? user.getOrganization().getName() : null)
+                .createdAt(user.getCreatedAt())
+                .build();
     }
-
-    public SystemUser UpdateUser(Long id,RegisterDto dto){
-        SystemUser user=getUser(id);
-
-        user.setUsername(dto.getUsername());
-        user.setFullName(dto.getFullName());
-        user.setPasswordHash(dto.getPassword());
-        user.setEmail(dto.getEmail());
-        user.setUser(dto.getUser());
-        
-
-                return repo.save(user);
-        
-    }
-
-    public void DeleteUser(Long id){
-        SystemUser existingUser = getUser(id);
-        repo.delete(existingUser);
-    }
-
-    public SystemUser patchUser(Long id, RegisterDto dto){
-        SystemUser user = getUser(id);
-
-        if (dto.getPassword() != null) {
-            user.setPasswordHash(dto.getPassword());
-        }
-        return repo.save(user);
-
-    }
-
 }
