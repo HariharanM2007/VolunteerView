@@ -33,6 +33,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        String path = request.getServletPath();
+
+    return path.startsWith("/swagger-ui")
+            || path.startsWith("/v3/api-docs")
+            || path.startsWith("/api/auth");
+}
+
+    @Override
     protected void doFilterInternal(@NonNull HttpServletRequest request,
                                      @NonNull HttpServletResponse response,
                                      @NonNull FilterChain filterChain) throws ServletException, IOException {
@@ -82,14 +91,5 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         filterChain.doFilter(request, response);
 
-        @Override
-        protected boolean shouldNotFilter(HttpServletRequest request) {
-
-    String path = request.getServletPath();
-
-    return path.startsWith("/api/auth")
-            || path.startsWith("/swagger-ui")
-            || path.startsWith("/v3/api-docs");
-}
     }
 }
