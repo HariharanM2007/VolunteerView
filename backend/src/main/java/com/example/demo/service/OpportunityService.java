@@ -30,10 +30,10 @@ public class OpportunityService {
     private final OrganizationRepository organizationRepository;
 
     @Transactional
-public OpportunityResponseDto createOpportunity(
+    public OpportunityResponseDto createOpportunity(
         OpportunityRequestDto dto,
         SystemUser actor
-) {
+    ) {
 
     if (actor.getRole() == Role.ORGANIZATION_COORDINATOR) {
 
@@ -79,6 +79,37 @@ public OpportunityResponseDto createOpportunity(
 
     return mapToResponseDto(opportunity);
 
-}
+    }
+
+
+
+
+
+
+    private OpportunityResponseDto mapToResponseDto(
+        Opportunity opportunity
+    ) {
+
+    return OpportunityResponseDto.builder()
+            .id(opportunity.getId())
+            .title(opportunity.getTitle())
+            .description(opportunity.getDescription())
+            .location(opportunity.getLocation())
+            .category(opportunity.getCategory())
+            .scheduledDate(opportunity.getScheduledDate())
+            .startTime(opportunity.getStartTime())
+            .endTime(opportunity.getEndTime())
+            .maxCapacity(opportunity.getMaxCapacity())
+            .enrolledCount(opportunity.getEnrolledCount())
+            .requiredSkills(opportunity.getRequiredSkills())
+            .status(opportunity.getStatus().name())
+            .organizationId(opportunity.getOrganization().getId())
+            .organizationName(opportunity.getOrganization().getName())
+            .enrolled(false)
+            .createdAt(opportunity.getCreatedAt())
+            .updatedAt(opportunity.getUpdatedAt())
+            .build();
+
+    }
 
 }
