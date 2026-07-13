@@ -4,6 +4,7 @@ package com.example.demo.service;
 import com.example.demo.enums.OpportunityStatus;
 import com.example.demo.dto.organization.OrganizationRequestDto;
 import com.example.demo.dto.organization.OrganizationResponseDto;
+import com.example.demo.entity.Opportunity;
 import com.example.demo.entity.Organization;
 import com.example.demo.entity.SystemUser;
 import com.example.demo.enums.OrganizationStatus;
@@ -157,16 +158,19 @@ public OrganizationResponseDto approveOrganization(Long id) {
 
     organization.setStatus(OrganizationStatus.SUSPENDED);
 
-    opportunityRepository
-            .findByOrganizationIdAndStatus(
-                    id,
-                    OpportunityStatus.OPEN
-            )
-            .forEach(opportunity -> {
-                opportunity.setStatus(
-                        OpportunityStatus.CLOSED
-                );
-            });
+    List<Opportunity> opportunities =
+        opportunityRepository.findByOrganizationIdAndStatus(
+                id,
+                OpportunityStatus.OPEN
+        );
+
+for (Opportunity opportunity : opportunities) {
+
+    opportunity.setStatus(OpportunityStatus.CLOSED);
+
+    opportunityRepository.save(opportunity);
+
+}
 
     organizationRepository.save(organization);
 
@@ -236,7 +240,7 @@ public OrganizationResponseDto approveOrganization(Long id) {
 
     }
 
-    
+
 
 
 
