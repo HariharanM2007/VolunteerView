@@ -1,14 +1,7 @@
 package com.example.demo.dto.opportunity;
 
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import jakarta.validation.constraints.*;
+import lombok.*;
 
 @Getter
 @Setter
@@ -31,16 +24,13 @@ public class OpportunityRequestDto {
     @Size(max = 50)
     private String category;
 
-    /** Format: YYYY-MM-DD */
-    @NotBlank
+    @NotBlank(message = "Scheduled date is required")
     private String scheduledDate;
 
-    /** Format: HH:mm */
-    @NotBlank
+    @NotBlank(message = "Start time is required")
     private String startTime;
 
-    /** Format: HH:mm */
-    @NotBlank
+    @NotBlank(message = "End time is required")
     private String endTime;
 
     @NotNull
@@ -52,4 +42,5 @@ public class OpportunityRequestDto {
 
     @NotNull
     private Long organizationId;
+
 }
