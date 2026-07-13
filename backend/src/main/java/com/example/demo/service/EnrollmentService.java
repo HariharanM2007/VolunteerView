@@ -114,7 +114,159 @@ public EnrollmentResponseDto enrollVolunteer(
 
     }
 
+    private VolunteerEnrollment findAndVerifyActor(
+        Long enrollmentId,
+        SystemUser actor
+) {
+
+    VolunteerEnrollment enrollment = enrollmentRepository
+            .findWithDetailsById(enrollmentId)
+            .orElseThrow(() ->
+                    new ResourceNotFoundException("Enrollment not found.")
+            );
+
+    if (actor.getRole() == Role.ORGANIZATION_COORDINATOR) {
+
+        if (actor.getOrganization() == null) {
+
+            throw new BusinessValidationException(
+                    "You are not assigned to any organization."
+            );
+
+        }
+
+        if (!actor.getOrganization().getId().equals(
+                enrollment.getOpportunity()
+                        .getOrganization()
+                        .getId())) {
+
+            throw new BusinessValidationException(
+                    "Access Denied: You can only manage enrollments for your assigned organization."
+            );
+
+        }
+
+    }
+
+    return enrollment;
+
+    }
+
+
+    @Transactional
+public EnrollmentResponseDto approveEnrollment(
+        Long enrollmentId,
+        SystemUser actor
+) {
+
+    VolunteerEnrollment enrollment =
+            findAndVerifyActor(enrollmentId, actor);
+
+    if (enrollment.getStatus() != EnrollmentStatus.PENDING) {
+
+        throw new BusinessValidationException(
+                "Only PENDING enrollments can be approved."
+        );
+
+    }
+
+    enrollment.setStatus(EnrollmentStatus.APPROVED);
+    enrollment.setApprovedAt(java.time.LocalDateTime.now());
+
+    enrollmentRepository.save(enrollment);
+
+    return mapToResponseDto(enrollment);
+
+    }
+
+    @Transactional
+public EnrollmentResponseDto rejectEnrollment(
+        Long enrollmentId,
+        SystemUser actor
+) {
+
+    VolunteerEnrollment enrollment =
+            findAndVerifyActor(enrollmentId, actor);
+
+    if (enrollment.getStatus() != EnrollmentStatus.PENDING) {
+
+        throw new BusinessValidationException(
+                "Only PENDING enrollments can be rejected."
+        );
+
+    }
+
+    Opportunity opportunity = enrollment.getOpportunity();
+
+    opportunity.setEnrolledCount(
+            Math.max(0, opportunity.getEnrolledCount() - 1)
+    );
+
+    enrollment.setStatus(EnrollmentStatus.REJECTED);
+
+    opportunityRepository.save(opportunity);
+
+    enrollmentRepository.save(enrollment);
+
+    return mapToResponseDto(enrollment);
+
+    }
+
+    @Transactional
+public EnrollmentResponseDto checkIn(
+        Long enrollmentId,
+        SystemUser actor
+) {
+
+    VolunteerEnrollment enrollment =
+            findAndVerifyActor(enrollmentId, actor);
+
+    if (enrollment.getStatus() != EnrollmentStatus.APPROVED) {
+
+        throw new BusinessValidationException(
+                "Volunteer must be APPROVED before checking in."
+        );
+
+    }
+
+    enrollment.setStatus(EnrollmentStatus.STARTED);
+
+    enrollmentRepository.save(enrollment);
+
+    return mapToResponseDto(enrollment);
+
+    }
+
+    @Transactional
+public EnrollmentResponseDto completeEnrollment(
+        Long enrollmentId,
+        Double hours,
+        SystemUser actor
+) {
+
+    VolunteerEnrollment enrollment =
+            findAndVerifyActor(enrollmentId, actor);
+
+    if (enrollment.getStatus() != EnrollmentStatus.STARTED) {
+
+        throw new BusinessValidationException(
+                "Volunteer must be in STARTED status before completion."
+        );
+
+    }
+
+    enrollment.setStatus(EnrollmentStatus.COMPLETED);
+    enrollment.setHoursLogged(hours);
+
+    enrollmentRepository.save(enrollment);
+
+    return mapToResponseDto(enrollment);
+
+    }
+
     
+
+
 
 
 
