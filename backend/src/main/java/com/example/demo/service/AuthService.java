@@ -141,7 +141,68 @@ public class AuthService {
 
     }
 
-    
+    public AuthResponseDto refreshToken(RefreshTokenRequestDto dto) {
+
+    if (dto.getRefreshToken() == null || dto.getRefreshToken().isBlank()) {
+        throw new BusinessValidationException(
+                "Refresh token is required"
+        );
+    }
+
+    String username;
+
+    try {
+
+        username = jwtService.extractUsername(dto.getRefreshToken());
+
+    } catch (Exception ex) {
+
+        throw new BusinessValidationException(
+                "Invalid or expired refresh token"
+        );
+
+    }
+
+    if (jwtService.isTokenExpired(dto.getRefreshToken())) {
+        throw new BusinessValidationException(
+                "Refresh token has expired. Please log in again."
+        );
+    }
+
+    SystemUser user = userRepository.findByUsername(username)
+            .orElseThrow(() -> new ResourceNotFoundException(
+                    "User not found for refresh token"
+            ));
+
+    if (!user.getIsActive()) {
+        throw new BusinessValidationException(
+                "Account is deactivated. Cannot refresh token."
+        );
+    }
+
+    String accessToken = jwtService.generateAccessToken(user);
+
+    return AuthResponseDto.builder()
+            .accessToken(accessToken)
+            .refreshToken(dto.getRefreshToken())
+            .userId(user.getId())
+            .username(user.getUsername())
+            .fullName(user.getFullName())
+            .role(user.getRole().name())
+            .status(user.getStatus().name())
+            .organizationId(
+                    user.getOrganization() != null
+                            ? user.getOrganization().getId()
+                            : null
+            )
+            .organizationName(
+                    user.getOrganization() != null
+                            ? user.getOrganization().getName()
+                            : null
+            )
+            .build();
+
+    }
 
 
 }
