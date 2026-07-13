@@ -29,4 +29,79 @@ public class OrganizationService {
 
     private final OpportunityRepository opportunityRepository;
 
+    @Transactional
+public OrganizationResponseDto createOrganization(OrganizationRequestDto dto) {
+
+    SystemUser coordinator = systemUserRepository.findById(dto.getCoordinatorId())
+            .orElseThrow(() ->
+                    new ResourceNotFoundException("Coordinator not found.")
+            );
+
+    if (coordinator.getRole() != Role.ORGANIZATION_COORDINATOR
+            && coordinator.getRole() != Role.PLATFORM_ADMIN) {
+
+        throw new BusinessValidationException(
+                "User "
+                        + coordinator.getUsername()
+                        + " must have ORGANIZATION_COORDINATOR or PLATFORM_ADMIN role."
+        );
+    }
+
+    if (organizationRepository.existsByName(dto.getName())) {
+
+        throw new BusinessValidationException(
+                "An organization with name "
+                        + dto.getName()
+                        + " already exists."
+        );
+
+    }
+
+    Organization organization = Organization.builder()
+            .name(dto.getName())
+            .mission(dto.getMission())
+            .address(dto.getAddress())
+            .contactEmail(dto.getContactEmail())
+            .contactPhone(dto.getContactPhone())
+            .foundedYear(dto.getFoundedYear())
+            .status(OrganizationStatus.PENDING)
+            .coordinator(coordinator)
+            .build();
+
+    organizationRepository.save(organization);
+
+    return mapToResponseDto(organization);
+
+    }
+
+
+    private OrganizationResponseDto mapToResponseDto(
+        Organization organization
+) {
+
+    return OrganizationResponseDto.builder()
+            .id(organization.getId())
+            .name(organization.getName())
+            .mission(organization.getMission())
+            .address(organization.getAddress())
+            .contactEmail(organization.getContactEmail())
+            .contactPhone(organization.getContactPhone())
+            .foundedYear(organization.getFoundedYear())
+            .status(organization.getStatus().name())
+            .coordinatorId(
+                    organization.getCoordinator() != null
+                            ? organization.getCoordinator().getId()
+                            : null
+            )
+            .coordinatorName(
+                    organization.getCoordinator() != null
+                            ? organization.getCoordinator().getFullName()
+                            : null
+            )
+            .createdAt(organization.getCreatedAt())
+            .updatedAt(organization.getUpdatedAt())
+            .build();
+
+    }
+
 }
