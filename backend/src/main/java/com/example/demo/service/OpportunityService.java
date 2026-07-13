@@ -82,6 +82,32 @@ public class OpportunityService {
     }
 
 
+    @Transactional
+    public OpportunityResponseDto updateOpportunity(
+        Long id,
+        OpportunityRequestDto dto,
+        SystemUser actor
+    ) {
+
+    Opportunity opportunity = findAndVerifyActor(id, actor);
+
+    opportunity.setTitle(dto.getTitle());
+    opportunity.setDescription(dto.getDescription());
+    opportunity.setCategory(dto.getCategory());
+    opportunity.setScheduledDate(LocalDate.parse(dto.getScheduledDate()));
+    opportunity.setStartTime(LocalTime.parse(dto.getStartTime()));
+    opportunity.setEndTime(LocalTime.parse(dto.getEndTime()));
+    opportunity.setLocation(dto.getLocation());
+    opportunity.setMaxCapacity(dto.getMaxCapacity());
+    opportunity.setRequiredSkills(dto.getRequiredSkills());
+
+    opportunityRepository.save(opportunity);
+
+    return mapToResponseDto(opportunity);
+
+}
+
+
 
 
 
@@ -111,5 +137,40 @@ public class OpportunityService {
             .build();
 
     }
+
+    private Opportunity findAndVerifyActor(
+        Long opportunityId,
+        SystemUser actor
+    ) {
+
+    Opportunity opportunity = opportunityRepository.findById(opportunityId)
+            .orElseThrow(() ->
+                    new ResourceNotFoundException("Opportunity not found.")
+            );
+
+    if (actor.getRole() == Role.ORGANIZATION_COORDINATOR) {
+
+        if (actor.getOrganization() == null) {
+
+            throw new BusinessValidationException(
+                    "You are not assigned to any organization."
+            );
+
+        }
+
+        if (!actor.getOrganization().getId().equals(
+                opportunity.getOrganization().getId())) {
+
+            throw new BusinessValidationException(
+                    "Access Denied: You can only manage opportunities for your assigned organization."
+            );
+
+        }
+
+    }
+
+    return opportunity;
+
+}
 
 }
