@@ -175,6 +175,25 @@ public OrganizationResponseDto approveOrganization(Long id) {
     }
 
 
+    @Transactional
+    public Page<OrganizationResponseDto> getAllOrganizations(Pageable pageable) {
+
+    return organizationRepository.findAll(pageable)
+            .map(this::mapToResponseDto);
+
+    }
+
+    @Transactional
+    public OrganizationResponseDto getOrganizationById(Long id) {
+
+    Organization organization = organizationRepository.findById(id)
+            .orElseThrow(() ->
+                    new ResourceNotFoundException("Organization not found.")
+            );
+
+    return mapToResponseDto(organization);
+
+    }
 
 
 
