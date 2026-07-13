@@ -3,11 +3,7 @@ package com.example.demo.dto.auth;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @Getter
 @Setter
@@ -16,25 +12,26 @@ import lombok.Setter;
 @Builder
 public class RegisterDto {
 
-    @NotBlank
+    @NotBlank(message = "Username is required")
     @Size(min = 3, max = 50)
     private String username;
 
-    @NotBlank
-    @Email
+    @NotBlank(message = "Email is required")
+    @Email(message = "Invalid email address")
     private String email;
 
-    @NotBlank
+    @NotBlank(message = "Password is required")
     @Size(min = 6, max = 100)
     private String password;
 
-    @NotBlank
+    @NotBlank(message = "Full name is required")
     @Size(max = 100)
     private String fullName;
 
     @Size(max = 20)
     private String phoneNumber;
 
-    @NotBlank
+    @NotBlank(message = "Role is required")
     private String role;
+
 }

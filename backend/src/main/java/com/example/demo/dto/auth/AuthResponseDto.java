@@ -1,10 +1,6 @@
 package com.example.demo.dto.auth;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @Getter
 @Setter
@@ -14,12 +10,21 @@ import lombok.Setter;
 public class AuthResponseDto {
 
     private String accessToken;
+
     private String refreshToken;
+
     private String username;
+
     private String fullName;
+
     private String role;
+
     private String status;
+
     private Long userId;
+
     private Long organizationId;
+
     private String organizationName;
+
 }
