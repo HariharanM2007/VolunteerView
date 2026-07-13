@@ -75,6 +75,35 @@ public OrganizationResponseDto createOrganization(OrganizationRequestDto dto) {
     }
 
 
+
+
+    @Transactional
+public OrganizationResponseDto updateOrganization(
+        Long id,
+        OrganizationRequestDto dto
+) {
+
+    Organization organization = organizationRepository.findById(id)
+            .orElseThrow(() ->
+                    new ResourceNotFoundException("Organization not found.")
+            );
+
+    organization.setName(dto.getName());
+    organization.setMission(dto.getMission());
+    organization.setAddress(dto.getAddress());
+    organization.setContactEmail(dto.getContactEmail());
+    organization.setContactPhone(dto.getContactPhone());
+    organization.setFoundedYear(dto.getFoundedYear());
+
+    organizationRepository.save(organization);
+
+    return mapToResponseDto(organization);
+
+}
+
+
+
+
     private OrganizationResponseDto mapToResponseDto(
         Organization organization
 ) {
