@@ -1,197 +1,197 @@
-package com.example.demo.service;
+// package com.example.demo.service;
 
-import com.example.demo.dto.enrollment.EnrollmentRequestDto;
-import com.example.demo.dto.enrollment.EnrollmentResponseDto;
-import com.example.demo.entity.Opportunity;
-import com.example.demo.entity.SystemUser;
-import com.example.demo.entity.VolunteerEnrollment;
-import com.example.demo.exception.BusinessValidationException;
-import com.example.demo.exception.ResourceNotFoundException;
-import com.example.demo.repository.OpportunityRepository;
-import com.example.demo.repository.SystemUserRepository;
-import com.example.demo.repository.VolunteerEnrollmentRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+// import com.example.demo.dto.enrollment.EnrollmentRequestDto;
+// import com.example.demo.dto.enrollment.EnrollmentResponseDto;
+// import com.example.demo.entity.Opportunity;
+// import com.example.demo.entity.SystemUser;
+// import com.example.demo.entity.VolunteerEnrollment;
+// import com.example.demo.exception.BusinessValidationException;
+// import com.example.demo.exception.ResourceNotFoundException;
+// import com.example.demo.repository.OpportunityRepository;
+// import com.example.demo.repository.SystemUserRepository;
+// import com.example.demo.repository.VolunteerEnrollmentRepository;
+// import lombok.RequiredArgsConstructor;
+// import org.springframework.data.domain.Page;
+// import org.springframework.data.domain.Pageable;
+// import org.springframework.stereotype.Service;
+// import org.springframework.transaction.annotation.Transactional;
 
-@Service
-@RequiredArgsConstructor
-public class EnrollmentService {
+// @Service
+// @RequiredArgsConstructor
+// public class EnrollmentService {
 
-    private final VolunteerEnrollmentRepository enrollmentRepository;
-    private final SystemUserRepository systemUserRepository;
-    private final OpportunityRepository opportunityRepository;
+//     private final VolunteerEnrollmentRepository enrollmentRepository;
+//     private final SystemUserRepository systemUserRepository;
+//     private final OpportunityRepository opportunityRepository;
 
-    @Transactional(rollbackFor = Exception.class)
-    public EnrollmentResponseDto enrollVolunteer(Long volunteerId, EnrollmentRequestDto dto) {
-        SystemUser volunteer = systemUserRepository.findById(volunteerId)
-                .orElseThrow(() -> new ResourceNotFoundException("SystemUser", volunteerId));
+//     @Transactional(rollbackFor = Exception.class)
+//     public EnrollmentResponseDto enrollVolunteer(Long volunteerId, EnrollmentRequestDto dto) {
+//         SystemUser volunteer = systemUserRepository.findById(volunteerId)
+//                 .orElseThrow(() -> new ResourceNotFoundException("SystemUser", volunteerId));
 
-        if (volunteer.getRole() != SystemUser.Role.VOLUNTEER) {
-            throw new BusinessValidationException("Only users with VOLUNTEER role can enroll.");
-        }
+//         if (volunteer.getRole() != SystemUser.Role.VOLUNTEER) {
+//             throw new BusinessValidationException("Only users with VOLUNTEER role can enroll.");
+//         }
 
-        if (volunteer.getStatus() != SystemUser.UserStatus.APPROVED) {
-            throw new BusinessValidationException("Your account must be APPROVED by an administrator before you can enroll.");
-        }
+//         if (volunteer.getStatus() != SystemUser.UserStatus.APPROVED) {
+//             throw new BusinessValidationException("Your account must be APPROVED by an administrator before you can enroll.");
+//         }
 
-        Opportunity opportunity = opportunityRepository.findById(dto.getOpportunityId())
-                .orElseThrow(() -> new ResourceNotFoundException("Opportunity", dto.getOpportunityId()));
+//         Opportunity opportunity = opportunityRepository.findById(dto.getOpportunityId())
+//                 .orElseThrow(() -> new ResourceNotFoundException("Opportunity", dto.getOpportunityId()));
 
-        if (opportunity.getStatus() != Opportunity.OpportunityStatus.OPEN) {
-            throw new BusinessValidationException("Cannot enroll in opportunity. Only OPEN opportunities accept enrollments.");
-        }
+//         if (opportunity.getStatus() != Opportunity.OpportunityStatus.OPEN) {
+//             throw new BusinessValidationException("Cannot enroll in opportunity. Only OPEN opportunities accept enrollments.");
+//         }
 
-        if (enrollmentRepository.existsByVolunteerIdAndOpportunityId(volunteerId, dto.getOpportunityId())) {
-            throw new BusinessValidationException("You are already enrolled in this opportunity.");
-        }
+//         if (enrollmentRepository.existsByVolunteerIdAndOpportunityId(volunteerId, dto.getOpportunityId())) {
+//             throw new BusinessValidationException("You are already enrolled in this opportunity.");
+//         }
 
-        if (opportunity.getEnrolledCount() >= opportunity.getMaxCapacity()) {
-            throw new BusinessValidationException("Opportunity is at full capacity");
-        }
+//         if (opportunity.getEnrolledCount() >= opportunity.getMaxCapacity()) {
+//             throw new BusinessValidationException("Opportunity is at full capacity");
+//         }
 
-        VolunteerEnrollment enrollment = VolunteerEnrollment.builder()
-                .volunteer(volunteer)
-                .opportunity(opportunity)
-                .status(VolunteerEnrollment.EnrollmentStatus.PENDING)
-                .notes(dto.getNotes())
-                .build();
+//         VolunteerEnrollment enrollment = VolunteerEnrollment.builder()
+//                 .volunteer(volunteer)
+//                 .opportunity(opportunity)
+//                 .status(VolunteerEnrollment.EnrollmentStatus.PENDING)
+//                 .notes(dto.getNotes())
+//                 .build();
 
-        VolunteerEnrollment saved = enrollmentRepository.save(enrollment);
+//         VolunteerEnrollment saved = enrollmentRepository.save(enrollment);
 
-        opportunity.setEnrolledCount(opportunity.getEnrolledCount() + 1);
-        opportunityRepository.save(opportunity);
+//         opportunity.setEnrolledCount(opportunity.getEnrolledCount() + 1);
+//         opportunityRepository.save(opportunity);
 
-        return mapToResponseDto(saved);
-    }
+//         return mapToResponseDto(saved);
+//     }
 
-    @Transactional(rollbackFor = Exception.class)
-    public EnrollmentResponseDto approveEnrollment(Long enrollmentId, SystemUser actor) {
-        VolunteerEnrollment enrollment = findAndVerifyActor(enrollmentId, actor);
+//     @Transactional(rollbackFor = Exception.class)
+//     public EnrollmentResponseDto approveEnrollment(Long enrollmentId, SystemUser actor) {
+//         VolunteerEnrollment enrollment = findAndVerifyActor(enrollmentId, actor);
 
-        if (enrollment.getStatus() != VolunteerEnrollment.EnrollmentStatus.PENDING) {
-            throw new BusinessValidationException("Only PENDING enrollments can be approved.");
-        }
+//         if (enrollment.getStatus() != VolunteerEnrollment.EnrollmentStatus.PENDING) {
+//             throw new BusinessValidationException("Only PENDING enrollments can be approved.");
+//         }
 
-        enrollment.setStatus(VolunteerEnrollment.EnrollmentStatus.APPROVED);
-        enrollment.setApprovedAt(java.time.LocalDateTime.now());
+//         enrollment.setStatus(VolunteerEnrollment.EnrollmentStatus.APPROVED);
+//         enrollment.setApprovedAt(java.time.LocalDateTime.now());
 
-        VolunteerEnrollment saved = enrollmentRepository.save(enrollment);
-        return mapToResponseDto(saved);
-    }
+//         VolunteerEnrollment saved = enrollmentRepository.save(enrollment);
+//         return mapToResponseDto(saved);
+//     }
 
-    @Transactional(rollbackFor = Exception.class)
-    public EnrollmentResponseDto checkin(Long enrollmentId, SystemUser actor) {
-        VolunteerEnrollment enrollment = enrollmentRepository.findById(enrollmentId)
-                .orElseThrow(() -> new ResourceNotFoundException("VolunteerEnrollment", enrollmentId));
+//     @Transactional(rollbackFor = Exception.class)
+//     public EnrollmentResponseDto checkin(Long enrollmentId, SystemUser actor) {
+//         VolunteerEnrollment enrollment = enrollmentRepository.findById(enrollmentId)
+//                 .orElseThrow(() -> new ResourceNotFoundException("VolunteerEnrollment", enrollmentId));
 
-        if (actor.getRole() == SystemUser.Role.ORGANIZATION_COORDINATOR) {
-            Long actorOrgId = actor.getOrganization() != null ? actor.getOrganization().getId() : null;
-            Long enrollmentOrgId = enrollment.getOpportunity().getOrganization() != null
-                    ? enrollment.getOpportunity().getOrganization().getId() : null;
+//         if (actor.getRole() == SystemUser.Role.ORGANIZATION_COORDINATOR) {
+//             Long actorOrgId = actor.getOrganization() != null ? actor.getOrganization().getId() : null;
+//             Long enrollmentOrgId = enrollment.getOpportunity().getOrganization() != null
+//                     ? enrollment.getOpportunity().getOrganization().getId() : null;
 
-            if (actorOrgId == null || !actorOrgId.equals(enrollmentOrgId)) {
-                throw new BusinessValidationException("Access Denied: You can only check in volunteers for your assigned organization.");
-            }
-        }
+//             if (actorOrgId == null || !actorOrgId.equals(enrollmentOrgId)) {
+//                 throw new BusinessValidationException("Access Denied: You can only check in volunteers for your assigned organization.");
+//             }
+//         }
 
-        if (enrollment.getStatus() != VolunteerEnrollment.EnrollmentStatus.APPROVED) {
-            throw new BusinessValidationException("Volunteer must be APPROVED before checking in.");
-        }
+//         if (enrollment.getStatus() != VolunteerEnrollment.EnrollmentStatus.APPROVED) {
+//             throw new BusinessValidationException("Volunteer must be APPROVED before checking in.");
+//         }
 
-        enrollment.setStatus(VolunteerEnrollment.EnrollmentStatus.STARTED);
-        enrollmentRepository.save(enrollment);
+//         enrollment.setStatus(VolunteerEnrollment.EnrollmentStatus.STARTED);
+//         enrollmentRepository.save(enrollment);
 
-        VolunteerEnrollment withDetails = enrollmentRepository.findWithDetailsById(enrollment.getId())
-                .orElseThrow(() -> new ResourceNotFoundException("VolunteerEnrollment", enrollment.getId()));
-        return mapToResponseDto(withDetails);
-    }
+//         VolunteerEnrollment withDetails = enrollmentRepository.findWithDetailsById(enrollment.getId())
+//                 .orElseThrow(() -> new ResourceNotFoundException("VolunteerEnrollment", enrollment.getId()));
+//         return mapToResponseDto(withDetails);
+//     }
 
-    @Transactional(rollbackFor = Exception.class)
-    public EnrollmentResponseDto completeEnrollment(Long enrollmentId, Double hours, SystemUser actor) {
-        VolunteerEnrollment enrollment = findAndVerifyActor(enrollmentId, actor);
+//     @Transactional(rollbackFor = Exception.class)
+//     public EnrollmentResponseDto completeEnrollment(Long enrollmentId, Double hours, SystemUser actor) {
+//         VolunteerEnrollment enrollment = findAndVerifyActor(enrollmentId, actor);
 
-        if (enrollment.getStatus() != VolunteerEnrollment.EnrollmentStatus.STARTED) {
-            throw new BusinessValidationException("Volunteer must be in STARTED status before completion.");
-        }
+//         if (enrollment.getStatus() != VolunteerEnrollment.EnrollmentStatus.STARTED) {
+//             throw new BusinessValidationException("Volunteer must be in STARTED status before completion.");
+//         }
 
-        enrollment.setStatus(VolunteerEnrollment.EnrollmentStatus.COMPLETED);
-        enrollment.setHoursLogged(hours);
+//         enrollment.setStatus(VolunteerEnrollment.EnrollmentStatus.COMPLETED);
+//         enrollment.setHoursLogged(hours);
 
-        VolunteerEnrollment saved = enrollmentRepository.save(enrollment);
-        return mapToResponseDto(saved);
-    }
+//         VolunteerEnrollment saved = enrollmentRepository.save(enrollment);
+//         return mapToResponseDto(saved);
+//     }
 
-    @Transactional(rollbackFor = Exception.class)
-    public EnrollmentResponseDto rejectEnrollment(Long enrollmentId, SystemUser actor) {
-        VolunteerEnrollment enrollment = findAndVerifyActor(enrollmentId, actor);
+//     @Transactional(rollbackFor = Exception.class)
+//     public EnrollmentResponseDto rejectEnrollment(Long enrollmentId, SystemUser actor) {
+//         VolunteerEnrollment enrollment = findAndVerifyActor(enrollmentId, actor);
 
-        if (enrollment.getStatus() != VolunteerEnrollment.EnrollmentStatus.PENDING) {
-            throw new BusinessValidationException("Only PENDING enrollments can be rejected.");
-        }
+//         if (enrollment.getStatus() != VolunteerEnrollment.EnrollmentStatus.PENDING) {
+//             throw new BusinessValidationException("Only PENDING enrollments can be rejected.");
+//         }
 
-        Opportunity opportunity = enrollment.getOpportunity();
-        opportunity.setEnrolledCount(Math.max(0, opportunity.getEnrolledCount() - 1));
-        opportunityRepository.save(opportunity);
+//         Opportunity opportunity = enrollment.getOpportunity();
+//         opportunity.setEnrolledCount(Math.max(0, opportunity.getEnrolledCount() - 1));
+//         opportunityRepository.save(opportunity);
 
-        enrollment.setStatus(VolunteerEnrollment.EnrollmentStatus.REJECTED);
+//         enrollment.setStatus(VolunteerEnrollment.EnrollmentStatus.REJECTED);
 
-        VolunteerEnrollment saved = enrollmentRepository.save(enrollment);
-        return mapToResponseDto(saved);
-    }
+//         VolunteerEnrollment saved = enrollmentRepository.save(enrollment);
+//         return mapToResponseDto(saved);
+//     }
 
-    @Transactional(readOnly = true)
-    public Page<EnrollmentResponseDto> getAllEnrollments(Pageable pageable) {
-        return enrollmentRepository.findAll(pageable).map(this::mapToResponseDto);
-    }
+//     @Transactional(readOnly = true)
+//     public Page<EnrollmentResponseDto> getAllEnrollments(Pageable pageable) {
+//         return enrollmentRepository.findAll(pageable).map(this::mapToResponseDto);
+//     }
 
-    @Transactional(readOnly = true)
-    public Page<EnrollmentResponseDto> getEnrollmentsByVolunteer(Long volunteerId, Pageable pageable) {
-        return enrollmentRepository.findByVolunteerId(volunteerId, pageable).map(this::mapToResponseDto);
-    }
+//     @Transactional(readOnly = true)
+//     public Page<EnrollmentResponseDto> getEnrollmentsByVolunteer(Long volunteerId, Pageable pageable) {
+//         return enrollmentRepository.findByVolunteerId(volunteerId, pageable).map(this::mapToResponseDto);
+//     }
 
-    @Transactional(readOnly = true)
-    public Page<EnrollmentResponseDto> getEnrollmentsByOrganization(Long orgId, Pageable pageable) {
-        return enrollmentRepository.findByOrganizationId(orgId, pageable).map(this::mapToResponseDto);
-    }
+//     @Transactional(readOnly = true)
+//     public Page<EnrollmentResponseDto> getEnrollmentsByOrganization(Long orgId, Pageable pageable) {
+//         return enrollmentRepository.findByOrganizationId(orgId, pageable).map(this::mapToResponseDto);
+//     }
 
-    /**
-     * Loads the enrollment and enforces that ORGANIZATION_COORDINATOR actors
-     * can only manage enrollments belonging to their own assigned organization.
-     */
-    private VolunteerEnrollment findAndVerifyActor(Long enrollmentId, SystemUser actor) {
-        VolunteerEnrollment enrollment = enrollmentRepository.findById(enrollmentId)
-                .orElseThrow(() -> new ResourceNotFoundException("VolunteerEnrollment", enrollmentId));
+//     /**
+//      * Loads the enrollment and enforces that ORGANIZATION_COORDINATOR actors
+//      * can only manage enrollments belonging to their own assigned organization.
+//      */
+//     private VolunteerEnrollment findAndVerifyActor(Long enrollmentId, SystemUser actor) {
+//         VolunteerEnrollment enrollment = enrollmentRepository.findById(enrollmentId)
+//                 .orElseThrow(() -> new ResourceNotFoundException("VolunteerEnrollment", enrollmentId));
 
-        if (actor.getRole() == SystemUser.Role.ORGANIZATION_COORDINATOR) {
-            Long actorOrgId = actor.getOrganization() != null ? actor.getOrganization().getId() : null;
-            Long enrollmentOrgId = enrollment.getOpportunity().getOrganization() != null
-                    ? enrollment.getOpportunity().getOrganization().getId() : null;
+//         if (actor.getRole() == SystemUser.Role.ORGANIZATION_COORDINATOR) {
+//             Long actorOrgId = actor.getOrganization() != null ? actor.getOrganization().getId() : null;
+//             Long enrollmentOrgId = enrollment.getOpportunity().getOrganization() != null
+//                     ? enrollment.getOpportunity().getOrganization().getId() : null;
 
-            if (actorOrgId == null || !actorOrgId.equals(enrollmentOrgId)) {
-                throw new BusinessValidationException("Access Denied: You can only manage enrollments for your assigned organization");
-            }
-        }
+//             if (actorOrgId == null || !actorOrgId.equals(enrollmentOrgId)) {
+//                 throw new BusinessValidationException("Access Denied: You can only manage enrollments for your assigned organization");
+//             }
+//         }
 
-        return enrollment;
-    }
+//         return enrollment;
+//     }
 
-    private EnrollmentResponseDto mapToResponseDto(VolunteerEnrollment enrollment) {
-        return EnrollmentResponseDto.builder()
-                .id(enrollment.getId())
-                .volunteerId(enrollment.getVolunteer() != null ? enrollment.getVolunteer().getId() : null)
-                .volunteerName(enrollment.getVolunteer() != null ? enrollment.getVolunteer().getFullName() : null)
-                .opportunityId(enrollment.getOpportunity() != null ? enrollment.getOpportunity().getId() : null)
-                .opportunityTitle(enrollment.getOpportunity() != null ? enrollment.getOpportunity().getTitle() : null)
-                .organizationName(enrollment.getOpportunity() != null && enrollment.getOpportunity().getOrganization() != null
-                        ? enrollment.getOpportunity().getOrganization().getName() : null)
-                .status(enrollment.getStatus() != null ? enrollment.getStatus().name() : null)
-                .enrolledAt(enrollment.getEnrolledAt())
-                .approvedAt(enrollment.getApprovedAt())
-                .hoursLogged(enrollment.getHoursLogged())
-                .notes(enrollment.getNotes())
-                .build();
-    }
-}
+//     private EnrollmentResponseDto mapToResponseDto(VolunteerEnrollment enrollment) {
+//         return EnrollmentResponseDto.builder()
+//                 .id(enrollment.getId())
+//                 .volunteerId(enrollment.getVolunteer() != null ? enrollment.getVolunteer().getId() : null)
+//                 .volunteerName(enrollment.getVolunteer() != null ? enrollment.getVolunteer().getFullName() : null)
+//                 .opportunityId(enrollment.getOpportunity() != null ? enrollment.getOpportunity().getId() : null)
+//                 .opportunityTitle(enrollment.getOpportunity() != null ? enrollment.getOpportunity().getTitle() : null)
+//                 .organizationName(enrollment.getOpportunity() != null && enrollment.getOpportunity().getOrganization() != null
+//                         ? enrollment.getOpportunity().getOrganization().getName() : null)
+//                 .status(enrollment.getStatus() != null ? enrollment.getStatus().name() : null)
+//                 .enrolledAt(enrollment.getEnrolledAt())
+//                 .approvedAt(enrollment.getApprovedAt())
+//                 .hoursLogged(enrollment.getHoursLogged())
+//                 .notes(enrollment.getNotes())
+//                 .build();
+//     }
+// }
