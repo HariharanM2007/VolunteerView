@@ -1,10 +1,6 @@
 package com.example.demo.dto.impact;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
@@ -16,14 +12,25 @@ import java.time.LocalDateTime;
 public class ImpactReportResponseDto {
 
     private Long id;
+
     private Long enrollmentId;
+
     private Long volunteerId;
+
     private String volunteerName;
+
     private String opportunityTitle;
+
     private String organizationName;
+
     private String summary;
+
     private Double hoursContributed;
+
     private Integer beneficiariesServed;
+
     private Integer rating;
+
     private LocalDateTime submittedAt;
+
 }

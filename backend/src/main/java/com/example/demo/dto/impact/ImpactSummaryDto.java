@@ -1,10 +1,6 @@
 package com.example.demo.dto.impact;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @Getter
 @Setter
@@ -14,7 +10,11 @@ import lombok.Setter;
 public class ImpactSummaryDto {
 
     private Double totalHoursContributed;
+
     private Integer totalBeneficiariesServed;
+
     private Double averageRating;
+
     private Long totalReports;
+
 }
