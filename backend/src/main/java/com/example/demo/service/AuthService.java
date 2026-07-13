@@ -81,6 +81,67 @@ public class AuthService {
 
     }
 
+    public AuthResponseDto login(AuthRequestDto dto) {
+
+    SystemUser user = userRepository.findByUsername(dto.getUsername())
+            .orElseThrow(() -> new BusinessValidationException(
+                    "Invalid credentials. No account found."
+            ));
+
+    if (!user.getIsActive()) {
+        throw new BusinessValidationException(
+                "Your account has been deactivated. Please contact a platform administrator."
+        );
+    }
+
+    if (user.getRole() == Role.PLATFORM_ADMIN
+            && user.getStatus() == UserStatus.PENDING) {
+
+        user.setStatus(UserStatus.APPROVED);
+        userRepository.save(user);
+    }
+
+    if (user.getStatus() != UserStatus.APPROVED) {
+        throw new BusinessValidationException(
+                "Your account status is "
+                        + user.getStatus()
+                        + ". You can only log in once an administrator approves your account."
+        );
+    }
+
+    if (!passwordEncoder.matches(dto.getPassword(), user.getPasswordHash())) {
+        throw new BusinessValidationException(
+                "Invalid credentials. Incorrect password."
+        );
+    }
+
+    String accessToken = jwtService.generateAccessToken(user);
+
+    String refreshToken = jwtService.generateRefreshToken(user);
+
+    return AuthResponseDto.builder()
+            .accessToken(accessToken)
+            .refreshToken(refreshToken)
+            .userId(user.getId())
+            .username(user.getUsername())
+            .fullName(user.getFullName())
+            .role(user.getRole().name())
+            .status(user.getStatus().name())
+            .organizationId(
+                    user.getOrganization() != null
+                            ? user.getOrganization().getId()
+                            : null
+            )
+            .organizationName(
+                    user.getOrganization() != null
+                            ? user.getOrganization().getName()
+                            : null
+            )
+            .build();
+
+    }
+
+    
 
 
 }
