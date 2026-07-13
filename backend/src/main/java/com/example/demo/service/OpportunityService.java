@@ -158,10 +158,10 @@ public class OpportunityService {
     }
 
     @Transactional
-public void deleteOpportunity(
+    public void deleteOpportunity(
         Long id,
         SystemUser actor
-) {
+    ) {
 
     Opportunity opportunity = findAndVerifyActor(id, actor);
 
@@ -169,6 +169,43 @@ public void deleteOpportunity(
 
     }
 
+
+    @Transactional
+    public Page<OpportunityResponseDto> getAllOpportunities(
+        Pageable pageable
+    ) {
+
+    return opportunityRepository.findAll(pageable)
+            .map(this::mapToResponseDto);
+
+    }
+
+
+    @Transactional
+    public OpportunityResponseDto getOpportunityById(Long id) {
+
+    Opportunity opportunity = opportunityRepository.findById(id)
+            .orElseThrow(() ->
+                    new ResourceNotFoundException("Opportunity not found.")
+            );
+
+    return mapToResponseDto(opportunity);
+
+    }
+
+    @Transactional
+    public List<OpportunityResponseDto> getOpportunitiesByOrganization(
+        Long organizationId
+    ) {
+
+    return opportunityRepository.findByOrganizationId(organizationId)
+            .stream()
+            .map(this::mapToResponseDto)
+            .toList();
+
+    }
+
+    
 
 
     private OpportunityResponseDto mapToResponseDto(
