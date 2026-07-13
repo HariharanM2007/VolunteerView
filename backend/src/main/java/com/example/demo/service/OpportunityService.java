@@ -105,6 +105,22 @@ public class OpportunityService {
 
     return mapToResponseDto(opportunity);
 
+    }
+
+    @Transactional
+    public OpportunityResponseDto publishOpportunity(
+        Long id,
+        SystemUser actor
+    ) {
+
+    Opportunity opportunity = findAndVerifyActor(id, actor);
+
+    opportunity.setStatus(OpportunityStatus.OPEN);
+
+    opportunityRepository.save(opportunity);
+
+    return mapToResponseDto(opportunity);
+
 }
 
 
