@@ -1,5 +1,7 @@
 package com.example.demo.service;
 
+
+import com.example.demo.enums.OpportunityStatus;
 import com.example.demo.dto.organization.OrganizationRequestDto;
 import com.example.demo.dto.organization.OrganizationResponseDto;
 import com.example.demo.entity.Organization;
@@ -134,7 +136,7 @@ public OrganizationResponseDto approveOrganization(Long id) {
 
 
     @Transactional(rollbackOn = Exception.class)
-public OrganizationResponseDto suspendOrganization(Long id) {
+    public OrganizationResponseDto suspendOrganization(Long id) {
 
     Organization organization = organizationRepository.findById(id)
             .orElseThrow(() ->
@@ -158,11 +160,11 @@ public OrganizationResponseDto suspendOrganization(Long id) {
     opportunityRepository
             .findByOrganizationIdAndStatus(
                     id,
-                    com.example.demo.enums.OpportunityStatus.OPEN
+                    OpportunityStatus.OPEN
             )
             .forEach(opportunity -> {
                 opportunity.setStatus(
-                        com.example.demo.enums.OpportunityStatus.CLOSED
+                        OpportunityStatus.CLOSED
                 );
             });
 
