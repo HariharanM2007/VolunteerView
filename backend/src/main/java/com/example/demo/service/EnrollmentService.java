@@ -264,6 +264,41 @@ public EnrollmentResponseDto completeEnrollment(
 
     }
 
+    @Transactional
+public Page<EnrollmentResponseDto> getAllEnrollments(
+        Pageable pageable
+) {
+
+    return enrollmentRepository.findAll(pageable)
+            .map(this::mapToResponseDto);
+
+    }
+
+
+    @Transactional
+public Page<EnrollmentResponseDto> getEnrollmentsByVolunteer(
+        Long volunteerId,
+        Pageable pageable
+) {
+
+    return enrollmentRepository
+            .findByVolunteerId(volunteerId, pageable)
+            .map(this::mapToResponseDto);
+
+    }
+
+    @Transactional
+public Page<EnrollmentResponseDto> getEnrollmentsByOrganization(
+        Long organizationId,
+        Pageable pageable
+) {
+
+    return enrollmentRepository
+            .findByOrganizationId(organizationId, pageable)
+            .map(this::mapToResponseDto);
+
+    }
+
     
 
 
