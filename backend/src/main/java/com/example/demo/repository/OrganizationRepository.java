@@ -1,6 +1,7 @@
 package com.example.demo.repository;
 
 import com.example.demo.entity.Organization;
+import com.example.demo.enums.OrganizationStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -16,12 +17,19 @@ public interface OrganizationRepository extends JpaRepository<Organization, Long
 
     Optional<Organization> findByCoordinatorId(Long coordinatorId);
 
-    List<Organization> findByStatus(Organization.OrganizationStatus status);
+    List<Organization> findByStatus(OrganizationStatus status);
 
     Page<Organization> findAll(Pageable pageable);
 
-    long countByStatus(Organization.OrganizationStatus status);
+    long countByStatus(OrganizationStatus status);
 
-    @Query("SELECT o FROM Organization o WHERE o.coordinator.id = :coordinatorId")
-    List<Organization> findAllByCoordinatorId(@Param("coordinatorId") Long coordinatorId);
+    @Query("""
+            SELECT o
+            FROM Organization o
+            WHERE o.coordinator.id = :coordinatorId
+            """)
+    List<Organization> findAllByCoordinatorId(
+            @Param("coordinatorId") Long coordinatorId
+    );
+
 }

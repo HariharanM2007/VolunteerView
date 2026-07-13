@@ -1,6 +1,8 @@
 package com.example.demo.repository;
 
 import com.example.demo.entity.SystemUser;
+import com.example.demo.enums.Role;
+import com.example.demo.enums.UserStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
@@ -16,11 +18,12 @@ public interface SystemUserRepository extends JpaRepository<SystemUser, Long> {
 
     boolean existsByEmail(String email);
 
-    List<SystemUser> findByRole(SystemUser.Role role);
+    List<SystemUser> findByRole(Role role);
 
-    List<SystemUser> findByStatus(SystemUser.UserStatus status);
+    List<SystemUser> findByStatus(UserStatus status);
 
     List<SystemUser> findByIsActiveTrue();
 
-    long countByRole(SystemUser.Role role);
+    long countByRole(Role role);
+
 }

@@ -1,6 +1,7 @@
 package com.example.demo.repository;
 
 import com.example.demo.entity.VolunteerEnrollment;
+import com.example.demo.enums.EnrollmentStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
@@ -11,42 +12,92 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 import java.util.Optional;
 
-public interface VolunteerEnrollmentRepository extends JpaRepository<VolunteerEnrollment, Long> {
+public interface VolunteerEnrollmentRepository
+        extends JpaRepository<VolunteerEnrollment, Long> {
 
-    boolean existsByVolunteerIdAndOpportunityId(Long volunteerId, Long opportunityId);
+    boolean existsByVolunteerIdAndOpportunityId(
+            Long volunteerId,
+            Long opportunityId
+    );
 
-    @Query("SELECT ve FROM VolunteerEnrollment ve " +
-            "JOIN FETCH ve.volunteer " +
-            "JOIN FETCH ve.opportunity " +
-            "JOIN FETCH ve.opportunity.organization " +
-            "WHERE ve.id = :id")
-    Optional<VolunteerEnrollment> findWithDetailsById(@Param("id") Long id);
+    @Query("""
+            SELECT ve
+            FROM VolunteerEnrollment ve
+            JOIN FETCH ve.volunteer
+            JOIN FETCH ve.opportunity
+            JOIN FETCH ve.opportunity.organization
+            WHERE ve.id = :id
+            """)
+    Optional<VolunteerEnrollment> findWithDetailsById(
+            @Param("id") Long id
+    );
 
     List<VolunteerEnrollment> findByVolunteerId(Long volunteerId);
 
     List<VolunteerEnrollment> findByOpportunityId(Long opportunityId);
 
-    @EntityGraph(attributePaths = {"volunteer", "opportunity", "opportunity.organization"})
+    @EntityGraph(attributePaths = {
+            "volunteer",
+            "opportunity",
+            "opportunity.organization"
+    })
     Page<VolunteerEnrollment> findAll(Pageable pageable);
 
-    @EntityGraph(attributePaths = {"volunteer", "opportunity", "opportunity.organization"})
-    Page<VolunteerEnrollment> findByVolunteerId(Long volunteerId, Pageable pageable);
+    @EntityGraph(attributePaths = {
+            "volunteer",
+            "opportunity",
+            "opportunity.organization"
+    })
+    Page<VolunteerEnrollment> findByVolunteerId(
+            Long volunteerId,
+            Pageable pageable
+    );
 
-    List<VolunteerEnrollment> findByStatus(VolunteerEnrollment.EnrollmentStatus status);
+    List<VolunteerEnrollment> findByStatus(
+            EnrollmentStatus status
+    );
 
-    long countByStatus(VolunteerEnrollment.EnrollmentStatus status);
+    long countByStatus(
+            EnrollmentStatus status
+    );
 
-    @Query("SELECT ve FROM VolunteerEnrollment ve WHERE ve.opportunity.id = :oppId AND ve.status = :status")
-    List<VolunteerEnrollment> findByOpportunityIdAndStatus(@Param("oppId") Long oppId,
-                                                             @Param("status") VolunteerEnrollment.EnrollmentStatus status);
+    @Query("""
+            SELECT ve
+            FROM VolunteerEnrollment ve
+            WHERE ve.opportunity.id = :opportunityId
+            AND ve.status = :status
+            """)
+    List<VolunteerEnrollment> findByOpportunityIdAndStatus(
+            @Param("opportunityId") Long opportunityId,
+            @Param("status") EnrollmentStatus status
+    );
 
-    @Query("SELECT COALESCE(SUM(ve.hoursLogged), 0) FROM VolunteerEnrollment ve WHERE ve.volunteer.id = :volunteerId")
-    Optional<Double> sumHoursLoggedByVolunteerId(@Param("volunteerId") Long volunteerId);
+    @Query("""
+            SELECT COALESCE(SUM(ve.hoursLogged),0)
+            FROM VolunteerEnrollment ve
+            WHERE ve.volunteer.id = :volunteerId
+            """)
+    Optional<Double> sumHoursLoggedByVolunteerId(
+            @Param("volunteerId") Long volunteerId
+    );
 
-    @Query("SELECT COUNT(ve) FROM VolunteerEnrollment ve WHERE ve.opportunity.organization.id = :orgId")
-    long countByOrganizationId(@Param("orgId") Long orgId);
+    @Query("""
+            SELECT COUNT(ve)
+            FROM VolunteerEnrollment ve
+            WHERE ve.opportunity.organization.id = :orgId
+            """)
+    long countByOrganizationId(
+            @Param("orgId") Long orgId
+    );
 
-    @EntityGraph(attributePaths = {"volunteer", "opportunity", "opportunity.organization"})
-    @Query("SELECT ve FROM VolunteerEnrollment ve WHERE ve.opportunity.organization.id = :orgId")
-    Page<VolunteerEnrollment> findByOrganizationId(@Param("orgId") Long orgId, Pageable pageable);
+    @Query("""
+            SELECT ve
+            FROM VolunteerEnrollment ve
+            WHERE ve.opportunity.organization.id = :orgId
+            """)
+    Page<VolunteerEnrollment> findByOrganizationId(
+            @Param("orgId") Long orgId,
+            Pageable pageable
+    );
+
 }
