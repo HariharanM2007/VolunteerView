@@ -196,6 +196,48 @@ public OrganizationResponseDto approveOrganization(Long id) {
     }
 
 
+    @Transactional
+    public List<OrganizationResponseDto> getOrganizationsByCoordinator(
+        Long coordinatorId
+) {
+
+    return organizationRepository.findAllByCoordinatorId(coordinatorId)
+            .stream()
+            .map(this::mapToResponseDto)
+            .toList();
+
+    }
+
+
+    @Transactional
+    public void deleteOrganization(Long id) {
+
+    Organization organization = organizationRepository.findById(id)
+            .orElseThrow(() ->
+                    new ResourceNotFoundException("Organization not found.")
+            );
+
+    long opportunityCount =
+            opportunityRepository.countByOrganizationId(id);
+
+    if (opportunityCount > 0) {
+
+        throw new BusinessValidationException(
+                "Cannot delete organization "
+                        + organization.getName()
+                        + " because it has "
+                        + opportunityCount
+                        + " associated opportunities. Remove all opportunities first."
+        );
+
+    }
+
+    organizationRepository.delete(organization);
+
+    }
+
+    
+
 
 
     private OrganizationResponseDto mapToResponseDto(
