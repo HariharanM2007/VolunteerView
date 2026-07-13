@@ -1,18 +1,20 @@
 package com.example.demo.entity;
 
+import com.example.demo.enums.EnrollmentStatus;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Table(
         name = "volunteer_enrollments",
-        uniqueConstraints = @UniqueConstraint(columnNames = {"volunteer_id", "opportunity_id"}, name = "uk_volunteer_opportunity")
+        uniqueConstraints = {
+                @UniqueConstraint(
+                        name = "uk_volunteer_opportunity",
+                        columnNames = {"volunteer_id", "opportunity_id"}
+                )
+        }
 )
 @Getter
 @Setter
@@ -33,9 +35,10 @@ public class VolunteerEnrollment {
     @JoinColumn(name = "opportunity_id", nullable = false)
     private Opportunity opportunity;
 
+    @Builder.Default
     @Enumerated(EnumType.STRING)
-    @Column(name = "enrollment_status", nullable = true, length = 30)
-    private EnrollmentStatus status;
+    @Column(name = "enrollment_status", nullable = false, length = 30)
+    private EnrollmentStatus status = EnrollmentStatus.PENDING;
 
     @Column(name = "enrolled_at", nullable = false, updatable = false)
     private LocalDateTime enrolledAt;
@@ -43,29 +46,25 @@ public class VolunteerEnrollment {
     @Column(name = "approved_at")
     private LocalDateTime approvedAt;
 
+    @Builder.Default
     @Column(name = "hours_logged")
-    private Double hoursLogged;
+    private Double hoursLogged = 0.0;
 
     @Column(length = 500)
     private String notes;
 
     @PrePersist
-    protected void onCreate() {
-        this.enrolledAt = LocalDateTime.now();
-        if (this.status == null) {
-            this.status = EnrollmentStatus.PENDING;
+    public void onCreate() {
+
+        enrolledAt = LocalDateTime.now();
+
+        if (status == null) {
+            status = EnrollmentStatus.PENDING;
         }
-        if (this.hoursLogged == null) {
-            this.hoursLogged = 0.0;
+
+        if (hoursLogged == null) {
+            hoursLogged = 0.0;
         }
     }
 
-    public enum EnrollmentStatus {
-        PENDING,
-        APPROVED,
-        STARTED,
-        COMPLETED,
-        REJECTED,
-        CANCELLED
-    }
 }
