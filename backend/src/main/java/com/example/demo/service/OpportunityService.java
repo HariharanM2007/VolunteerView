@@ -121,10 +121,53 @@ public class OpportunityService {
 
     return mapToResponseDto(opportunity);
 
-}
+    }
 
 
+    @Transactional
+    public OpportunityResponseDto closeOpportunity(
+        Long id,
+        SystemUser actor
+    ) {
 
+    Opportunity opportunity = findAndVerifyActor(id, actor);
+
+    opportunity.setStatus(OpportunityStatus.CLOSED);
+
+    opportunityRepository.save(opportunity);
+
+    return mapToResponseDto(opportunity);
+
+    }
+
+
+    @Transactional
+    public OpportunityResponseDto completeOpportunity(
+        Long id,
+        SystemUser actor
+    ) {
+
+    Opportunity opportunity = findAndVerifyActor(id, actor);
+
+    opportunity.setStatus(OpportunityStatus.COMPLETED);
+
+    opportunityRepository.save(opportunity);
+
+    return mapToResponseDto(opportunity);
+
+    }
+
+    @Transactional
+public void deleteOpportunity(
+        Long id,
+        SystemUser actor
+) {
+
+    Opportunity opportunity = findAndVerifyActor(id, actor);
+
+    opportunityRepository.delete(opportunity);
+
+    }
 
 
 
