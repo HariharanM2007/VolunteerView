@@ -1,11 +1,9 @@
 package com.example.demo.entity;
 
+import com.example.demo.enums.Role;
+import com.example.demo.enums.UserStatus;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
@@ -22,10 +20,10 @@ public class SystemUser {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "username", unique = true, nullable = false, length = 50)
+    @Column(nullable = false, unique = true, length = 50)
     private String username;
 
-    @Column(name = "email", unique = true, nullable = false, length = 100)
+    @Column(nullable = false, unique = true, length = 100)
     private String email;
 
     @Column(name = "password_hash", nullable = false)
@@ -38,20 +36,20 @@ public class SystemUser {
     private String phoneNumber;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "role", nullable = false, length = 30)
+    @Column(nullable = false, length = 30)
     private Role role;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false, length = 30)
     @Builder.Default
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 30)
     private UserStatus status = UserStatus.PENDING;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "organization_id")
     private Organization organization;
 
-    @Column(name = "is_active", nullable = false)
     @Builder.Default
+    @Column(name = "is_active", nullable = false)
     private Boolean isActive = true;
 
     @Column(name = "created_at", nullable = false, updatable = false)
@@ -61,26 +59,13 @@ public class SystemUser {
     private LocalDateTime updatedAt;
 
     @PrePersist
-    protected void onCreate() {
-        this.createdAt = LocalDateTime.now();
-        this.updatedAt = LocalDateTime.now();
+    public void onCreate() {
+        createdAt = LocalDateTime.now();
+        updatedAt = createdAt;
     }
 
     @PreUpdate
-    protected void onUpdate() {
-        this.updatedAt = LocalDateTime.now();
-    }
-
-    public enum Role {
-        PLATFORM_ADMIN,
-        ORGANIZATION_COORDINATOR,
-        VOLUNTEER
-    }
-
-    public enum UserStatus {
-        PENDING,
-        APPROVED,
-        REJECTED,
-        DEACTIVATED
+    public void onUpdate() {
+        updatedAt = LocalDateTime.now();
     }
 }
