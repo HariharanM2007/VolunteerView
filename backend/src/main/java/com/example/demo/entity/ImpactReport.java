@@ -1,18 +1,19 @@
 package com.example.demo.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Table(
         name = "impact_reports",
-        uniqueConstraints = @UniqueConstraint(columnNames = {"enrollment_id"}, name = "uk_enrollment_report")
+        uniqueConstraints = {
+                @UniqueConstraint(
+                        name = "uk_enrollment_report",
+                        columnNames = "enrollment_id"
+                )
+        }
 )
 @Getter
 @Setter
@@ -36,10 +37,10 @@ public class ImpactReport {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String summary;
 
-    @Column(name = "hours_contributed", nullable = false)
+    @Column(nullable = false)
     private Double hoursContributed;
 
-    @Column(name = "beneficiaries_served", nullable = false)
+    @Column(nullable = false)
     private Integer beneficiariesServed;
 
     @Column(nullable = false)
@@ -49,7 +50,7 @@ public class ImpactReport {
     private LocalDateTime submittedAt;
 
     @PrePersist
-    protected void onCreate() {
-        this.submittedAt = LocalDateTime.now();
+    public void onCreate() {
+        submittedAt = LocalDateTime.now();
     }
 }
