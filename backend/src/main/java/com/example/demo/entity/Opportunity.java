@@ -1,11 +1,8 @@
 package com.example.demo.entity;
 
+import com.example.demo.enums.OpportunityStatus;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -38,36 +35,40 @@ public class Opportunity {
     @Column(length = 50)
     private String category;
 
-    @Column(name = "scheduled_date", nullable = false)
+    @Column(nullable = false)
     private LocalDate scheduledDate;
 
-    @Column(name = "start_time", nullable = false)
+    @Column(nullable = false)
     private LocalTime startTime;
 
-    @Column(name = "end_time", nullable = false)
+    @Column(nullable = false)
     private LocalTime endTime;
 
-    @Column(name = "max_capacity", nullable = false)
+    @Column(nullable = false)
     private Integer maxCapacity;
 
-    @Column(name = "enrolled_count", nullable = false)
     @Builder.Default
+    @Column(nullable = false)
     private Integer enrolledCount = 0;
 
-    @Column(name = "required_skills", length = 500)
+    @Column(length = 500)
     private String requiredSkills;
 
+    @Builder.Default
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
-    @Builder.Default
     private OpportunityStatus status = OpportunityStatus.DRAFT;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "organization_id", nullable = false)
     private Organization organization;
 
-    @OneToMany(mappedBy = "opportunity", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
+    @OneToMany(
+            mappedBy = "opportunity",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
     private List<VolunteerEnrollment> enrollments = new ArrayList<>();
 
     @Column(name = "created_at", nullable = false, updatable = false)
@@ -77,20 +78,13 @@ public class Opportunity {
     private LocalDateTime updatedAt;
 
     @PrePersist
-    protected void onCreate() {
-        this.createdAt = LocalDateTime.now();
-        this.updatedAt = LocalDateTime.now();
+    public void onCreate() {
+        createdAt = LocalDateTime.now();
+        updatedAt = createdAt;
     }
 
     @PreUpdate
-    protected void onUpdate() {
-        this.updatedAt = LocalDateTime.now();
-    }
-
-    public enum OpportunityStatus {
-        DRAFT,
-        OPEN,
-        CLOSED,
-        COMPLETED
+    public void onUpdate() {
+        updatedAt = LocalDateTime.now();
     }
 }

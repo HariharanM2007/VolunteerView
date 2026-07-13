@@ -1,11 +1,8 @@
 package com.example.demo.entity;
 
+import com.example.demo.enums.OrganizationStatus;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -24,7 +21,7 @@ public class Organization {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(unique = true, nullable = false, length = 150)
+    @Column(nullable = false, unique = true, length = 150)
     private String name;
 
     @Column(nullable = false, columnDefinition = "TEXT")
@@ -33,26 +30,30 @@ public class Organization {
     @Column(nullable = false, length = 255)
     private String address;
 
-    @Column(name = "contact_email", nullable = false, length = 100)
+    @Column(nullable = false, length = 100)
     private String contactEmail;
 
-    @Column(name = "contact_phone", length = 20)
+    @Column(length = 20)
     private String contactPhone;
 
-    @Column(name = "founded_year")
+    @Column
     private Integer foundedYear;
 
+    @Builder.Default
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
-    @Builder.Default
     private OrganizationStatus status = OrganizationStatus.PENDING;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "coordinator_id", nullable = false)
     private SystemUser coordinator;
 
-    @OneToMany(mappedBy = "organization", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
+    @OneToMany(
+            mappedBy = "organization",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
     private List<Opportunity> opportunities = new ArrayList<>();
 
     @Column(name = "created_at", nullable = false, updatable = false)
@@ -62,19 +63,13 @@ public class Organization {
     private LocalDateTime updatedAt;
 
     @PrePersist
-    protected void onCreate() {
-        this.createdAt = LocalDateTime.now();
-        this.updatedAt = LocalDateTime.now();
+    public void onCreate() {
+        createdAt = LocalDateTime.now();
+        updatedAt = createdAt;
     }
 
     @PreUpdate
-    protected void onUpdate() {
-        this.updatedAt = LocalDateTime.now();
-    }
-
-    public enum OrganizationStatus {
-        PENDING,
-        APPROVED,
-        SUSPENDED
+    public void onUpdate() {
+        updatedAt = LocalDateTime.now();
     }
 }
