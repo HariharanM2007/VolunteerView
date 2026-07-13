@@ -1,4 +1,4 @@
-package com.example.demo.dto;
+package com.example.demo.dto.user;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -6,20 +6,23 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
+
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class AuthResponseDto {
+public class UserResponseDto {
 
-    private String accessToken;
-    private String refreshToken;
+    private Long id;
     private String username;
+    private String email;
     private String fullName;
+    private String phoneNumber;
     private String role;
     private String status;
-    private Long userId;
     private Long organizationId;
     private String organizationName;
+    private LocalDateTime createdAt;
 }

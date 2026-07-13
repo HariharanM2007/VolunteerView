@@ -1,7 +1,7 @@
 package com.example.demo.service;
 
-import com.example.demo.dto.OpportunityRequestDto;
-import com.example.demo.dto.OpportunityResponseDto;
+import com.example.demo.dto.opportunity.OpportunityRequestDto;
+import com.example.demo.dto.opportunity.OpportunityResponseDto;
 import com.example.demo.entity.Opportunity;
 import com.example.demo.entity.Organization;
 import com.example.demo.entity.SystemUser;

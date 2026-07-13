@@ -1,6 +1,6 @@
 package com.example.demo.service;
 
-import com.example.demo.dto.DashboardStatsDto;
+import com.example.demo.dto.dashboard.DashboardStatsDto;
 import com.example.demo.entity.Opportunity;
 import com.example.demo.entity.Organization;
 import com.example.demo.entity.SystemUser;
