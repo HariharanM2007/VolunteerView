@@ -30,7 +30,7 @@ public class OrganizationService {
     private final OpportunityRepository opportunityRepository;
 
     @Transactional
-public OrganizationResponseDto createOrganization(OrganizationRequestDto dto) {
+    public OrganizationResponseDto createOrganization(OrganizationRequestDto dto) {
 
     SystemUser coordinator = systemUserRepository.findById(dto.getCoordinatorId())
             .orElseThrow(() ->
@@ -78,7 +78,7 @@ public OrganizationResponseDto createOrganization(OrganizationRequestDto dto) {
 
 
     @Transactional
-public OrganizationResponseDto updateOrganization(
+    public OrganizationResponseDto updateOrganization(
         Long id,
         OrganizationRequestDto dto
 ) {
@@ -99,7 +99,80 @@ public OrganizationResponseDto updateOrganization(
 
     return mapToResponseDto(organization);
 
-}
+    }
+
+
+
+    @Transactional
+public OrganizationResponseDto approveOrganization(Long id) {
+
+    Organization organization = organizationRepository.findById(id)
+            .orElseThrow(() ->
+                    new ResourceNotFoundException("Organization not found.")
+            );
+
+    if (organization.getStatus() != OrganizationStatus.PENDING) {
+
+        throw new BusinessValidationException(
+                "Organization "
+                        + organization.getName()
+                        + " cannot be approved. Current status: "
+                        + organization.getStatus()
+                        + ". Only PENDING organizations can be approved."
+        );
+
+    }
+
+    organization.setStatus(OrganizationStatus.APPROVED);
+
+    organizationRepository.save(organization);
+
+    return mapToResponseDto(organization);
+
+    }
+
+
+
+    @Transactional(rollbackOn = Exception.class)
+public OrganizationResponseDto suspendOrganization(Long id) {
+
+    Organization organization = organizationRepository.findById(id)
+            .orElseThrow(() ->
+                    new ResourceNotFoundException("Organization not found.")
+            );
+
+    if (organization.getStatus() != OrganizationStatus.APPROVED) {
+
+        throw new BusinessValidationException(
+                "Organization "
+                        + organization.getName()
+                        + " cannot be suspended. Current status: "
+                        + organization.getStatus()
+                        + ". Only APPROVED organizations can be suspended."
+        );
+
+    }
+
+    organization.setStatus(OrganizationStatus.SUSPENDED);
+
+    opportunityRepository
+            .findByOrganizationIdAndStatus(
+                    id,
+                    com.example.demo.enums.OpportunityStatus.OPEN
+            )
+            .forEach(opportunity -> {
+                opportunity.setStatus(
+                        com.example.demo.enums.OpportunityStatus.CLOSED
+                );
+            });
+
+    organizationRepository.save(organization);
+
+    return mapToResponseDto(organization);
+
+    }
+
+
 
 
 
