@@ -6,6 +6,7 @@ import com.example.demo.entity.Opportunity;
 import com.example.demo.entity.Organization;
 import com.example.demo.entity.SystemUser;
 import com.example.demo.enums.OpportunityStatus;
+import com.example.demo.enums.OrganizationStatus;
 import com.example.demo.enums.Role;
 import com.example.demo.exception.BusinessValidationException;
 import com.example.demo.exception.ResourceNotFoundException;
@@ -122,6 +123,15 @@ public class OpportunityService {
     Opportunity opportunity = findAndVerifyActor(id, actor);
 
     opportunity.setStatus(OpportunityStatus.OPEN);
+
+    if (opportunity.getOrganization().getStatus()
+        != OrganizationStatus.APPROVED) {
+
+    throw new BusinessValidationException(
+            "Cannot publish opportunities for a non-approved organization."
+    );
+
+    }
 
     opportunityRepository.save(opportunity);
 
