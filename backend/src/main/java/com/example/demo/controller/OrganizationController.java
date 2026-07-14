@@ -5,6 +5,9 @@ import com.example.demo.dto.organization.OrganizationResponseDto;
 import com.example.demo.service.OrganizationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
