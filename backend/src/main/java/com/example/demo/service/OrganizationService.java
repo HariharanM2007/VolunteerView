@@ -98,6 +98,15 @@ public class OrganizationService {
     organization.setContactPhone(dto.getContactPhone());
     organization.setFoundedYear(dto.getFoundedYear());
 
+    if (!organization.getName().equals(dto.getName())
+        && organizationRepository.existsByName(dto.getName())) {
+
+    throw new BusinessValidationException(
+            "Organization name already exists."
+    );
+
+        }
+
     organizationRepository.save(organization);
 
     return mapToResponseDto(organization);
