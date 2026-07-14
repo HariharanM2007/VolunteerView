@@ -1,44 +1,102 @@
-// package com.example.demo.service;
+package com.example.demo.service;
 
-// import com.example.demo.dto.dashboard.DashboardStatsDto;
-// import com.example.demo.entity.Opportunity;
-// import com.example.demo.entity.Organization;
-// import com.example.demo.entity.SystemUser;
-// import com.example.demo.entity.VolunteerEnrollment;
-// import com.example.demo.repository.ImpactReportRepository;
-// import com.example.demo.repository.OpportunityRepository;
-// import com.example.demo.repository.OrganizationRepository;
-// import com.example.demo.repository.SystemUserRepository;
-// import com.example.demo.repository.VolunteerEnrollmentRepository;
-// import lombok.RequiredArgsConstructor;
-// import org.springframework.stereotype.Service;
-// import org.springframework.transaction.annotation.Transactional;
+import com.example.demo.dto.dashboard.DashboardStatsDto;
+import com.example.demo.enums.EnrollmentStatus;
+import com.example.demo.enums.OpportunityStatus;
+import com.example.demo.enums.OrganizationStatus;
+import com.example.demo.enums.Role;
+import com.example.demo.repository.ImpactReportRepository;
+import com.example.demo.repository.OpportunityRepository;
+import com.example.demo.repository.OrganizationRepository;
+import com.example.demo.repository.SystemUserRepository;
+import com.example.demo.repository.VolunteerEnrollmentRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 
-// @Service
-// @RequiredArgsConstructor
-// public class DashboardService {
+@Service
+@RequiredArgsConstructor
+public class DashboardService {
 
-//     private final SystemUserRepository systemUserRepository;
-//     private final OrganizationRepository organizationRepository;
-//     private final OpportunityRepository opportunityRepository;
-//     private final VolunteerEnrollmentRepository enrollmentRepository;
-//     private final ImpactReportRepository impactReportRepository;
+    private final SystemUserRepository userRepository;
 
-//     @Transactional(readOnly = true)
-//     public DashboardStatsDto getPlatformStats() {
-//         return DashboardStatsDto.builder()
-//                 .totalVolunteers(systemUserRepository.countByRole(SystemUser.Role.VOLUNTEER))
-//                 .totalOrganizations(organizationRepository.count())
-//                 .totalOpportunities(opportunityRepository.count())
-//                 .totalEnrollments(enrollmentRepository.count())
-//                 .pendingOrganizations(organizationRepository.countByStatus(Organization.OrganizationStatus.PENDING))
-//                 .approvedOrganizations(organizationRepository.countByStatus(Organization.OrganizationStatus.APPROVED))
-//                 .openOpportunities(opportunityRepository.countByStatus(Opportunity.OpportunityStatus.OPEN))
-//                 .pendingEnrollments(enrollmentRepository.countByStatus(VolunteerEnrollment.EnrollmentStatus.PENDING))
-//                 .approvedEnrollments(enrollmentRepository.countByStatus(VolunteerEnrollment.EnrollmentStatus.APPROVED))
-//                 .completedEnrollments(enrollmentRepository.countByStatus(VolunteerEnrollment.EnrollmentStatus.COMPLETED))
-//                 .rejectedEnrollments(enrollmentRepository.countByStatus(VolunteerEnrollment.EnrollmentStatus.REJECTED))
-//                 .totalImpactReports(impactReportRepository.count())
-//                 .build();
-//     }
-// }
+    private final OrganizationRepository organizationRepository;
+
+    private final OpportunityRepository opportunityRepository;
+
+    private final VolunteerEnrollmentRepository enrollmentRepository;
+
+    private final ImpactReportRepository impactReportRepository;
+
+    public DashboardStatsDto getDashboardStatistics() {
+
+    return DashboardStatsDto.builder()
+
+            .totalVolunteers(
+                    userRepository.countByRole(Role.VOLUNTEER)
+            )
+
+            .totalOrganizations(
+                    organizationRepository.count()
+            )
+
+            .totalOpportunities(
+                    opportunityRepository.count()
+            )
+
+            .totalEnrollments(
+                    enrollmentRepository.count()
+            )
+
+            .pendingOrganizations(
+                    organizationRepository.countByStatus(
+                            OrganizationStatus.PENDING
+                    )
+            )
+
+            .approvedOrganizations(
+                    organizationRepository.countByStatus(
+                            OrganizationStatus.APPROVED
+                    )
+            )
+
+            .openOpportunities(
+                    opportunityRepository.countByStatus(
+                            OpportunityStatus.OPEN
+                    )
+            )
+
+            .pendingEnrollments(
+                    enrollmentRepository.countByStatus(
+                            EnrollmentStatus.PENDING
+                    )
+            )
+
+            .approvedEnrollments(
+                    enrollmentRepository.countByStatus(
+                            EnrollmentStatus.APPROVED
+                    )
+            )
+
+            .completedEnrollments(
+                    enrollmentRepository.countByStatus(
+                            EnrollmentStatus.COMPLETED
+                    )
+            )
+
+            .rejectedEnrollments(
+                    enrollmentRepository.countByStatus(
+                            EnrollmentStatus.REJECTED
+                    )
+            )
+
+            .totalImpactReports(
+                    impactReportRepository.count()
+            )
+
+            .build();
+
+    }
+
+    
+
+}
