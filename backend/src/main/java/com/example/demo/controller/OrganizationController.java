@@ -116,6 +116,21 @@ public ResponseEntity<List<OrganizationResponseDto>> getOrganizationsByCoordinat
 
     }
 
+    @DeleteMapping("/{id}")
+public ResponseEntity<Void> deleteOrganization(
+
+        @PathVariable Long id
+
+) {
+
+    organizationService.deleteOrganization(id);
+
+    return ResponseEntity.noContent().build();
+
+    }
+
     
+
+
 
 }
