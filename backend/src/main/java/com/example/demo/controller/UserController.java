@@ -1,36 +1,72 @@
-// package com.example.demo.controller;
+package com.example.demo.controller;
 
-// import com.example.demo.dto.user.UserResponseDto;
-// import com.example.demo.service.UserService;
-// import lombok.RequiredArgsConstructor;
-// import org.springframework.http.ResponseEntity;
-// import org.springframework.security.access.prepost.PreAuthorize;
-// import org.springframework.web.bind.annotation.*;
+import com.example.demo.dto.user.UserResponseDto;
+import com.example.demo.service.UserService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
-// import java.util.List;
-// import java.util.Map;
+@RestController
+@RequestMapping("/api/users")
+@RequiredArgsConstructor
+public class UserController {
 
-// @RestController
-// @RequestMapping("/api/users")
-// @PreAuthorize("hasRole('PLATFORM_ADMIN')")
-// @RequiredArgsConstructor
-// public class UserController {
+    private final UserService userService;
 
-//     private final UserService userService;
+    @PatchMapping("/{id}/approve")
+public ResponseEntity<UserResponseDto> approveUser(
 
-//     @GetMapping
-//     public ResponseEntity<List<UserResponseDto>> getAllUsers() {
-//         return ResponseEntity.ok(userService.getAllUsers());
-//     }
+        @PathVariable Long id
 
-//     @PatchMapping("/{id}/status")
-//     public ResponseEntity<UserResponseDto> updateStatus(@PathVariable Long id, @RequestBody Map<String, String> payload) {
-//         String status = payload.get("status");
-//         return ResponseEntity.ok(userService.updateStatus(id, status));
-//     }
+) {
 
-//     @PatchMapping("/{id}/assign-organization/{orgId}")
-//     public ResponseEntity<UserResponseDto> assignOrganization(@PathVariable Long id, @PathVariable Long orgId) {
-//         return ResponseEntity.ok(userService.assignOrganization(id, orgId));
-//     }
-// }
+    return ResponseEntity.ok(
+            userService.approveUser(id)
+    );
+
+    }
+
+    @PatchMapping("/{id}/deactivate")
+public ResponseEntity<UserResponseDto> deactivateUser(
+
+        @PathVariable Long id
+
+) {
+
+    return ResponseEntity.ok(
+            userService.deactivateUser(id)
+    );
+
+    }
+
+    @GetMapping
+public ResponseEntity<Page<UserResponseDto>> getAllUsers(
+
+        Pageable pageable
+
+) {
+
+    return ResponseEntity.ok(
+            userService.getAllUsers(pageable)
+    );
+
+    }
+
+    @GetMapping("/{id}")
+public ResponseEntity<UserResponseDto> getUserById(
+
+        @PathVariable Long id
+
+) {
+
+    return ResponseEntity.ok(
+            userService.getUserById(id)
+    );
+
+    }
+
+    
+
+}
