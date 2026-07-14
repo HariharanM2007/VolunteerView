@@ -42,23 +42,23 @@ public class SecurityConfig {
 
                 .authorizeHttpRequests(auth -> auth
 
-        // Public Authentication APIs
-        .requestMatchers("/api/auth/**").permitAll()
+                // Public Authentication APIs
+                .requestMatchers("/api/auth/**").permitAll()
 
-        // Swagger / OpenAPI
-        .requestMatchers(
+                // Swagger / OpenAPI
+                .requestMatchers(
                 "/swagger-ui/**",
                 "/swagger-ui.html",
                 "/v3/api-docs/**"
-        ).permitAll()
+                ).permitAll()
 
-        // CORS Preflight
-        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                // CORS Preflight
+                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
-        // Everything else requires authentication
-        .anyRequest().authenticated()
+                // Everything else requires authentication
+                .anyRequest().authenticated()
 
-)
+                )
 
                 .addFilterBefore(
                         jwtAuthenticationFilter,
