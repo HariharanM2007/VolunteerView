@@ -1,5 +1,7 @@
 package com.example.demo.security;
 
+import jakarta.annotation.PostConstruct;
+
 import com.example.demo.entity.SystemUser;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -23,7 +25,14 @@ public class JwtService {
     @Value("${app.jwt.expiration-ms}")
     private long accessTokenExpiration;
 
-    private long refreshTokenExpiration = accessTokenExpiration * 7;
+    private long refreshTokenExpiration;
+
+    @PostConstruct
+    public void init() {
+
+    refreshTokenExpiration = accessTokenExpiration * 7;
+
+    }
 
     public String generateAccessToken(SystemUser user) {
 
