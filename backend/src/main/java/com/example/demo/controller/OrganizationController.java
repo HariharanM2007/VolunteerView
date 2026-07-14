@@ -64,6 +64,58 @@ public class OrganizationController {
 
     }
 
+    @PatchMapping("/{id}/suspend")
+    public ResponseEntity<OrganizationResponseDto> suspendOrganization(
+
+        @PathVariable Long id
+
+    ) {
+
+    return ResponseEntity.ok(
+            organizationService.suspendOrganization(id)
+    );
+
+    }
+
+    @GetMapping
+    public ResponseEntity<Page<OrganizationResponseDto>> getAllOrganizations(
+
+        Pageable pageable
+
+    ) {
+
+    return ResponseEntity.ok(
+            organizationService.getAllOrganizations(pageable)
+    );
+
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<OrganizationResponseDto> getOrganizationById(
+
+        @PathVariable Long id
+
+    ) {
+
+    return ResponseEntity.ok(
+            organizationService.getOrganizationById(id)
+    );
+
+    }
+
+    @GetMapping("/coordinator/{coordinatorId}")
+public ResponseEntity<List<OrganizationResponseDto>> getOrganizationsByCoordinator(
+
+        @PathVariable Long coordinatorId
+
+) {
+
+    return ResponseEntity.ok(
+            organizationService.getOrganizationsByCoordinator(coordinatorId)
+    );
+
+    }
+
     
 
 }
