@@ -40,6 +40,128 @@ public ResponseEntity<OpportunityResponseDto> createOpportunity(
 
     }
 
-     
+     @PutMapping("/{id}")
+public ResponseEntity<OpportunityResponseDto> updateOpportunity(
+
+        @PathVariable Long id,
+
+        @Valid
+        @RequestBody OpportunityRequestDto dto,
+
+        @AuthenticationPrincipal
+        SystemUser actor
+
+) {
+
+    return ResponseEntity.ok(
+            opportunityService.updateOpportunity(id, dto, actor)
+    );
+
+    }
+
+    @PatchMapping("/{id}/publish")
+public ResponseEntity<OpportunityResponseDto> publishOpportunity(
+
+        @PathVariable Long id,
+
+        @AuthenticationPrincipal
+        SystemUser actor
+
+) {
+
+    return ResponseEntity.ok(
+            opportunityService.publishOpportunity(id, actor)
+    );
+
+    }
+
+    @PatchMapping("/{id}/close")
+public ResponseEntity<OpportunityResponseDto> closeOpportunity(
+
+        @PathVariable Long id,
+
+        @AuthenticationPrincipal
+        SystemUser actor
+
+) {
+
+    return ResponseEntity.ok(
+            opportunityService.closeOpportunity(id, actor)
+    );
+
+    }
+
+    @PatchMapping("/{id}/complete")
+public ResponseEntity<OpportunityResponseDto> completeOpportunity(
+
+        @PathVariable Long id,
+
+        @AuthenticationPrincipal
+        SystemUser actor
+
+) {
+
+    return ResponseEntity.ok(
+            opportunityService.completeOpportunity(id, actor)
+    );
+
+    }
+
+    @DeleteMapping("/{id}")
+public ResponseEntity<Void> deleteOpportunity(
+
+        @PathVariable Long id,
+
+        @AuthenticationPrincipal
+        SystemUser actor
+
+) {
+
+    opportunityService.deleteOpportunity(id, actor);
+
+    return ResponseEntity.noContent().build();
+
+    }
+
+    @GetMapping
+public ResponseEntity<Page<OpportunityResponseDto>> getAllOpportunities(
+
+        Pageable pageable
+
+) {
+
+    return ResponseEntity.ok(
+            opportunityService.getAllOpportunities(pageable)
+    );
+
+    }
+
+    @GetMapping("/{id}")
+public ResponseEntity<OpportunityResponseDto> getOpportunityById(
+
+        @PathVariable Long id
+
+) {
+
+    return ResponseEntity.ok(
+            opportunityService.getOpportunityById(id)
+    );
+
+    }
+
+    @GetMapping("/organization/{organizationId}")
+public ResponseEntity<List<OpportunityResponseDto>> getOpportunitiesByOrganization(
+
+        @PathVariable Long organizationId
+
+) {
+
+    return ResponseEntity.ok(
+            opportunityService.getOpportunitiesByOrganization(organizationId)
+    );
+
+    }
+
+    
 
 }
