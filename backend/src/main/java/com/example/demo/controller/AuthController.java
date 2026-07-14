@@ -32,4 +32,32 @@ public class AuthController {
 
     }
 
+    @PostMapping("/login")
+    public ResponseEntity<AuthResponseDto> login(
+
+        @Valid
+        @RequestBody AuthRequestDto dto
+
+    ) {
+
+    return ResponseEntity.ok(
+            authService.login(dto)
+    );
+
+    }
+
+
+    @PostMapping("/refresh")
+    public ResponseEntity<AuthResponseDto> refreshToken(
+
+        @RequestBody RefreshTokenRequestDto dto
+
+    ) {
+
+    return ResponseEntity.ok(
+            authService.refreshToken(dto)
+    );
+
+    }
+
 }
