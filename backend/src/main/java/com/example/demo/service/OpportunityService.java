@@ -101,6 +101,12 @@ public class OpportunityService {
     opportunity.setMaxCapacity(dto.getMaxCapacity());
     opportunity.setRequiredSkills(dto.getRequiredSkills());
 
+    if (dto.getMaxCapacity() < opportunity.getEnrolledCount()) {
+    throw new BusinessValidationException(
+        "Maximum capacity cannot be less than current enrolled volunteers."
+    );
+    }
+
     opportunityRepository.save(opportunity);
 
     return mapToResponseDto(opportunity);
