@@ -23,8 +23,7 @@ public class JwtService {
     @Value("${app.jwt.expiration-ms}")
     private long accessTokenExpiration;
 
-    @Value("${jwt.refresh-token-expiration}")
-    private long refreshTokenExpiration;
+    private long refreshTokenExpiration = accessTokenExpiration * 7;
 
     public String generateAccessToken(SystemUser user) {
 
