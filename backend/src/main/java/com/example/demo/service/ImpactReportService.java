@@ -28,6 +28,131 @@ public class ImpactReportService {
 
     private final SystemUserRepository userRepository;
 
+    @Transactional
+public ImpactReportResponseDto submitImpactReport(
+        Long volunteerId,
+        ImpactReportRequestDto dto
+) {
+
+    SystemUser volunteer = userRepository.findById(volunteerId)
+            .orElseThrow(() ->
+                    new ResourceNotFoundException("Volunteer not found.")
+            );
+
+    VolunteerEnrollment enrollment =
+            enrollmentRepository.findWithDetailsById(dto.getEnrollmentId())
+                    .orElseThrow(() ->
+                            new ResourceNotFoundException(
+                                    "Enrollment not found."
+                            )
+                    );
+
+    if (!enrollment.getVolunteer().getId().equals(volunteerId)) {
+
+        throw new BusinessValidationException(
+                "You can only submit reports for your own enrollments."
+        );
+
+    }
+
+    if (enrollment.getStatus() != EnrollmentStatus.COMPLETED) {
+
+        throw new BusinessValidationException(
+                "Impact reports can only be submitted for COMPLETED enrollments."
+        );
+
+    }
+
+    if (impactReportRepository.existsByEnrollmentId(
+            enrollment.getId())) {
+
+        throw new BusinessValidationException(
+                "An impact report has already been submitted."
+        );
+
+    }
+
+    if (dto.getHoursContributed() > enrollment.getHoursLogged()) {
+
+        throw new BusinessValidationException(
+                "Hours contributed cannot exceed logged hours."
+        );
+
+    }
+
+    ImpactReport report = ImpactReport.builder()
+            .enrollment(enrollment)
+            .volunteer(volunteer)
+            .summary(dto.getSummary())
+            .hoursContributed(dto.getHoursContributed())
+            .beneficiariesServed(dto.getBeneficiariesServed())
+            .rating(dto.getRating())
+            .build();
+
+    impactReportRepository.save(report);
+
+    return mapToResponseDto(report);
+
+    }
+
+
+    @Transactional
+public List<ImpactReportResponseDto> getReportsByVolunteer(
+        Long volunteerId
+) {
+
+    return impactReportRepository.findByVolunteerId(volunteerId)
+            .stream()
+            .map(this::mapToResponseDto)
+            .toList();
+
+    }
+
+    @Transactional
+public List<ImpactReportResponseDto> getReportsByOrganization(
+        Long organizationId
+) {
+
+    return impactReportRepository.findByOrganizationId(organizationId)
+            .stream()
+            .map(this::mapToResponseDto)
+            .toList();
+
+    }
+
+    @Transactional
+public ImpactSummaryDto getImpactSummary(
+        Long volunteerId
+) {
+
+    Double totalHours =
+            impactReportRepository
+                    .sumHoursContributedByVolunteerId(volunteerId);
+
+    Integer totalBeneficiaries =
+            impactReportRepository
+                    .sumBeneficiariesServedByVolunteerId(volunteerId);
+
+    Double averageRating =
+            impactReportRepository
+                    .avgRatingByVolunteerId(volunteerId);
+
+    Long totalReports =
+            (long) impactReportRepository
+                    .findByVolunteerId(volunteerId)
+                    .size();
+
+    return ImpactSummaryDto.builder()
+            .totalHoursContributed(totalHours)
+            .totalBeneficiariesServed(totalBeneficiaries)
+            .averageRating(averageRating)
+            .totalReports(totalReports)
+            .build();
+
+    }
+
+    
+
 
 
 
@@ -65,6 +190,6 @@ public class ImpactReportService {
             .submittedAt(report.getSubmittedAt())
             .build();
 
-}
+    }
 
 }
