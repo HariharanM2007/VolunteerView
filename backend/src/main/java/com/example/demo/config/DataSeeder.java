@@ -34,22 +34,23 @@ public class DataSeeder implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
 
-        if (userRepository.existsByUsername("admin")) {
-    return;
-}
+        SystemUser admin = userRepository.findByUsername("admin")
+        .orElseGet(() -> {
 
-SystemUser admin = SystemUser.builder()
-        .username("admin")
-        .email("admin@volunteerview.com")
-        .passwordHash(passwordEncoder.encode("Admin@123"))
-        .fullName("Platform Administrator")
-        .phoneNumber("9999999999")
-        .role(Role.PLATFORM_ADMIN)
-        .status(UserStatus.APPROVED)
-        .isActive(true)
-        .build();
+            SystemUser user = SystemUser.builder()
+                    .username("admin")
+                    .email("admin@volunteerview.com")
+                    .passwordHash(passwordEncoder.encode("Admin@123"))
+                    .fullName("Platform Administrator")
+                    .phoneNumber("9999999999")
+                    .role(Role.PLATFORM_ADMIN)
+                    .status(UserStatus.APPROVED)
+                    .isActive(true)
+                    .build();
 
-userRepository.save(admin);
+            return userRepository.save(user);
+
+        });
 
 
     SystemUser coordinator = userRepository.findByUsername("coordinator")
@@ -141,7 +142,7 @@ userRepository.save(admin);
     }
 
 
-    
+
 
     }
 }
