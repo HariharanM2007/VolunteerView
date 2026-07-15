@@ -1,7 +1,9 @@
 package com.example.demo.config;
 
+import com.example.demo.entity.Opportunity;
 import com.example.demo.entity.Organization;
 import com.example.demo.entity.SystemUser;
+import com.example.demo.enums.OpportunityStatus;
 import com.example.demo.enums.OrganizationStatus;
 import com.example.demo.enums.Role;
 import com.example.demo.enums.UserStatus;
@@ -12,6 +14,10 @@ import com.example.demo.enums.UserStatus;
 import com.example.demo.repository.OpportunityRepository;
 import com.example.demo.repository.SystemUserRepository;
 import lombok.RequiredArgsConstructor;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
+
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
@@ -83,6 +89,59 @@ userRepository.save(admin);
                     return organizationRepository.save(org);
 
                 });
+
+
+                if (coordinator.getOrganization() == null) {
+
+    coordinator.setOrganization(organization);
+
+    userRepository.save(coordinator);
+
+}
+
+
+    userRepository.findByUsername("volunteer")
+        .orElseGet(() -> {
+
+            SystemUser volunteer = SystemUser.builder()
+                    .username("volunteer")
+                    .email("volunteer@volunteerview.com")
+                    .passwordHash(passwordEncoder.encode("Volunteer@123"))
+                    .fullName("Sample Volunteer")
+                    .phoneNumber("7777777777")
+                    .role(Role.VOLUNTEER)
+                    .status(UserStatus.APPROVED)
+                    .organization(organization)
+                    .isActive(true)
+                    .build();
+
+            return userRepository.save(volunteer);
+
+        });
+
+
+        if (opportunityRepository.count() == 0) {
+
+    Opportunity opportunity = Opportunity.builder()
+            .title("Tree Plantation Drive")
+            .description("Join us in planting trees across the city.")
+            .location("Coimbatore")
+            .category("Environment")
+            .scheduledDate(LocalDate.now().plusDays(7))
+            .startTime(LocalTime.of(9, 0))
+            .endTime(LocalTime.of(12, 0))
+            .maxCapacity(50)
+            .requiredSkills("Teamwork")
+            .status(OpportunityStatus.OPEN)
+            .organization(organization)
+            .build();
+
+    opportunityRepository.save(opportunity);
+
+    }
+
+
+    
 
     }
 }
