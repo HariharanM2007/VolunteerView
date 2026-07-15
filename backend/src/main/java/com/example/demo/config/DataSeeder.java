@@ -1,6 +1,8 @@
 package com.example.demo.config;
 
+import com.example.demo.entity.Organization;
 import com.example.demo.entity.SystemUser;
+import com.example.demo.enums.OrganizationStatus;
 import com.example.demo.enums.Role;
 import com.example.demo.enums.UserStatus;
 
@@ -42,6 +44,45 @@ SystemUser admin = SystemUser.builder()
         .build();
 
 userRepository.save(admin);
+
+
+    SystemUser coordinator = userRepository.findByUsername("coordinator")
+        .orElseGet(() -> {
+
+            SystemUser user = SystemUser.builder()
+                    .username("coordinator")
+                    .email("coordinator@volunteerview.com")
+                    .passwordHash(passwordEncoder.encode("Coordinator@123"))
+                    .fullName("Organization Coordinator")
+                    .phoneNumber("8888888888")
+                    .role(Role.ORGANIZATION_COORDINATOR)
+                    .status(UserStatus.APPROVED)
+                    .isActive(true)
+                    .build();
+
+            return userRepository.save(user);
+
+        });
+
+
+        Organization organization =
+        organizationRepository.findByCoordinatorId(coordinator.getId())
+                .orElseGet(() -> {
+
+                    Organization org = Organization.builder()
+                            .name("Helping Hands Foundation")
+                            .mission("Creating positive social impact through volunteering.")
+                            .address("Coimbatore, Tamil Nadu")
+                            .contactEmail("contact@helpinghands.org")
+                            .contactPhone("9876543210")
+                            .foundedYear(2022)
+                            .status(OrganizationStatus.APPROVED)
+                            .coordinator(coordinator)
+                            .build();
+
+                    return organizationRepository.save(org);
+
+                });
 
     }
 }
