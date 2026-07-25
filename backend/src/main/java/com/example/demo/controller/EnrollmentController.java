@@ -41,6 +41,21 @@ public ResponseEntity<EnrollmentResponseDto> enrollVolunteer(
 
     }
 
+    @PostMapping
+public ResponseEntity<EnrollmentResponseDto> enroll(
+        Object actor,
+        @RequestBody EnrollmentRequestDto dto
+) {
+    return enrollVolunteer((SystemUser) actor, dto);
+}
+
+        public ResponseEntity<EnrollmentResponseDto> approve(
+        Object actor,
+        Long id
+) {
+    return approveEnrollment(id, (SystemUser) actor);
+}
+
     @PatchMapping("/{id}/approve")
 public ResponseEntity<EnrollmentResponseDto> approveEnrollment(
 
