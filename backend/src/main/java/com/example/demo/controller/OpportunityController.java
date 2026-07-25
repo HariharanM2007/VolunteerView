@@ -1,7 +1,7 @@
 package com.example.demo.controller;
 
-import com.example.demo.dto.opportunity.OpportunityRequestDto;
-import com.example.demo.dto.opportunity.OpportunityResponseDto;
+import com.example.demo.dto.OpportunityRequestDto;
+import com.example.demo.dto.OpportunityResponseDto;
 import com.example.demo.entity.SystemUser;
 import com.example.demo.service.OpportunityService;
 import jakarta.validation.Valid;

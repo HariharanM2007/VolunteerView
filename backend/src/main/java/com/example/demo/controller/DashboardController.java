@@ -1,6 +1,6 @@
 package com.example.demo.controller;
 
-import com.example.demo.dto.dashboard.DashboardStatsDto;
+import com.example.demo.dto.DashboardStatsDto;
 import com.example.demo.service.DashboardService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

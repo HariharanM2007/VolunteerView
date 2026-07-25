@@ -1,4 +1,4 @@
-package com.example.demo.dto.impact;
+package com.example.demo.dto;
 
 import jakarta.validation.constraints.*;
 import lombok.*;

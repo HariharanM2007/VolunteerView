@@ -1,7 +1,7 @@
 package com.example.demo.service;
 
-import com.example.demo.dto.enrollment.EnrollmentRequestDto;
-import com.example.demo.dto.enrollment.EnrollmentResponseDto;
+import com.example.demo.dto.EnrollmentRequestDto;
+import com.example.demo.dto.EnrollmentResponseDto;
 import com.example.demo.entity.Opportunity;
 import com.example.demo.entity.SystemUser;
 import com.example.demo.entity.VolunteerEnrollment;

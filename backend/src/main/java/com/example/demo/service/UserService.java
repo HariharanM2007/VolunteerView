@@ -1,6 +1,6 @@
 package com.example.demo.service;
 
-import com.example.demo.dto.user.UserResponseDto;
+import com.example.demo.dto.UserResponseDto;
 import com.example.demo.entity.SystemUser;
 import com.example.demo.enums.UserStatus;
 import com.example.demo.exception.ResourceNotFoundException;

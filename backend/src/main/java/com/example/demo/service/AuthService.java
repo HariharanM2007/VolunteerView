@@ -1,9 +1,9 @@
 package com.example.demo.service;
 
-import com.example.demo.dto.auth.AuthRequestDto;
-import com.example.demo.dto.auth.AuthResponseDto;
-import com.example.demo.dto.auth.RefreshTokenRequestDto;
-import com.example.demo.dto.auth.RegisterDto;
+import com.example.demo.dto.AuthRequestDto;
+import com.example.demo.dto.AuthResponseDto;
+import com.example.demo.dto.RefreshTokenRequestDto;
+import com.example.demo.dto.RegisterDto;
 import com.example.demo.entity.SystemUser;
 import com.example.demo.enums.Role;
 import com.example.demo.enums.UserStatus;

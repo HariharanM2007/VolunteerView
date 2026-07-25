@@ -1,4 +1,4 @@
-package com.example.demo.dto.enrollment;
+package com.example.demo.dto;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;

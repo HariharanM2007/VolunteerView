@@ -1,6 +1,6 @@
 package com.example.demo.controller;
 
-import com.example.demo.dto.user.UserResponseDto;
+import com.example.demo.dto.UserResponseDto;
 import com.example.demo.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;

@@ -1,37 +1,38 @@
-package com.example.demo.dto.organization;
+package com.example.demo.dto;
 
-import jakarta.validation.constraints.*;
 import lombok.*;
+
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class OrganizationRequestDto {
+public class OrganizationResponseDto {
 
-    @NotBlank
-    @Size(max = 150)
+    private Long id;
+
     private String name;
 
-    @NotBlank
     private String mission;
 
-    @NotBlank
-    @Size(max = 255)
     private String address;
 
-    @NotBlank
-    @Email
     private String contactEmail;
 
-    @Size(max = 20)
     private String contactPhone;
 
-    @Min(1800)
-    @Max(2100)
     private Integer foundedYear;
 
+    private String status;
+
     private Long coordinatorId;
+
+    private String coordinatorName;
+
+    private LocalDateTime createdAt;
+
+    private LocalDateTime updatedAt;
 
 }

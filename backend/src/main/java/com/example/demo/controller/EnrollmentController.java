@@ -1,7 +1,7 @@
 package com.example.demo.controller;
 
-import com.example.demo.dto.enrollment.EnrollmentRequestDto;
-import com.example.demo.dto.enrollment.EnrollmentResponseDto;
+import com.example.demo.dto.EnrollmentRequestDto;
+import com.example.demo.dto.EnrollmentResponseDto;
 import com.example.demo.entity.SystemUser;
 import com.example.demo.service.EnrollmentService;
 import jakarta.validation.Valid;

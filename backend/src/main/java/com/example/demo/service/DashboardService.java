@@ -1,6 +1,6 @@
 package com.example.demo.service;
 
-import com.example.demo.dto.dashboard.DashboardStatsDto;
+import com.example.demo.dto.DashboardStatsDto;
 import com.example.demo.enums.EnrollmentStatus;
 import com.example.demo.enums.OpportunityStatus;
 import com.example.demo.enums.OrganizationStatus;

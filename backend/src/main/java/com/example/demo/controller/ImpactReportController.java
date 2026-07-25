@@ -1,8 +1,8 @@
 package com.example.demo.controller;
 
-import com.example.demo.dto.impact.ImpactReportRequestDto;
-import com.example.demo.dto.impact.ImpactReportResponseDto;
-import com.example.demo.dto.impact.ImpactSummaryDto;
+import com.example.demo.dto.ImpactReportRequestDto;
+import com.example.demo.dto.ImpactReportResponseDto;
+import com.example.demo.dto.ImpactSummaryDto;
 import com.example.demo.entity.SystemUser;
 import com.example.demo.service.ImpactReportService;
 import jakarta.validation.Valid;

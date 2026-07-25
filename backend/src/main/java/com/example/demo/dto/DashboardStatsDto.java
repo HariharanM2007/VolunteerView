@@ -1,4 +1,4 @@
-package com.example.demo.dto.dashboard;
+package com.example.demo.dto;
 
 import lombok.*;
 
