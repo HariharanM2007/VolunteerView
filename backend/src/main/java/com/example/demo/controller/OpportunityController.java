@@ -3,6 +3,7 @@ package com.example.demo.controller;
 import com.example.demo.dto.OpportunityRequestDto;
 import com.example.demo.dto.OpportunityResponseDto;
 import com.example.demo.entity.SystemUser;
+import com.example.demo.repository.SystemUserRepository;
 import com.example.demo.service.OpportunityService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -21,21 +22,22 @@ import java.util.List;
 public class OpportunityController {
 
     private final OpportunityService opportunityService;
+    private final SystemUserRepository systemUserRepository;
 
     @PostMapping
-public ResponseEntity<OpportunityResponseDto> createOpportunity(
-
-        @Valid
-        @RequestBody OpportunityRequestDto dto,
+    public ResponseEntity<OpportunityResponseDto> create(
 
         @AuthenticationPrincipal
-        SystemUser actor
+        Object actor,
+
+        @Valid
+        @RequestBody OpportunityRequestDto dto
 
 ) {
 
     return ResponseEntity.status(HttpStatus.CREATED)
             .body(
-                    opportunityService.createOpportunity(dto, actor)
+                    opportunityService.createOpportunity(dto, (SystemUser) actor)
             );
 
     }
