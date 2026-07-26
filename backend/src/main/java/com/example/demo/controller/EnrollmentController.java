@@ -21,10 +21,10 @@ public class EnrollmentController {
     private final EnrollmentService enrollmentService;
 
     @PostMapping
-public ResponseEntity<EnrollmentResponseDto> enrollVolunteer(
+    public ResponseEntity<EnrollmentResponseDto> enroll(
 
         @AuthenticationPrincipal
-        SystemUser actor,
+        Object actor,
 
         @Valid
         @RequestBody EnrollmentRequestDto dto
@@ -34,40 +34,25 @@ public ResponseEntity<EnrollmentResponseDto> enrollVolunteer(
     return ResponseEntity.status(HttpStatus.CREATED)
             .body(
                     enrollmentService.enrollVolunteer(
-                            actor.getId(),
+                            ((SystemUser) actor).getId(),
                             dto
                     )
             );
 
     }
 
-    @PostMapping
-public ResponseEntity<EnrollmentResponseDto> enroll(
-        Object actor,
-        @RequestBody EnrollmentRequestDto dto
-) {
-    return enrollVolunteer((SystemUser) actor, dto);
-}
-
-        public ResponseEntity<EnrollmentResponseDto> approve(
-        Object actor,
-        Long id
-) {
-    return approveEnrollment(id, (SystemUser) actor);
-}
-
     @PatchMapping("/{id}/approve")
-public ResponseEntity<EnrollmentResponseDto> approveEnrollment(
-
-        @PathVariable Long id,
+    public ResponseEntity<EnrollmentResponseDto> approve(
 
         @AuthenticationPrincipal
-        SystemUser actor
+        Object actor,
+
+        @PathVariable Long id
 
 ) {
 
     return ResponseEntity.ok(
-            enrollmentService.approveEnrollment(id, actor)
+            enrollmentService.approveEnrollment(id, (SystemUser) actor)
     );
 
     }
@@ -89,17 +74,17 @@ public ResponseEntity<EnrollmentResponseDto> rejectEnrollment(
     }
 
     @PatchMapping("/{id}/check-in")
-public ResponseEntity<EnrollmentResponseDto> checkIn(
-
-        @PathVariable Long id,
+    public ResponseEntity<EnrollmentResponseDto> checkIn(
 
         @AuthenticationPrincipal
-        SystemUser actor
+        Object actor,
+
+        @PathVariable Long id
 
 ) {
 
     return ResponseEntity.ok(
-            enrollmentService.checkIn(id, actor)
+            enrollmentService.checkIn(id, (SystemUser) actor)
     );
 
     }
