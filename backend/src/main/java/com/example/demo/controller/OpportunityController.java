@@ -7,6 +7,8 @@ import com.example.demo.repository.SystemUserRepository;
 import com.example.demo.service.OpportunityService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -128,7 +130,7 @@ public ResponseEntity<Void> deleteOpportunity(
     @GetMapping
 public ResponseEntity<Page<OpportunityResponseDto>> getAllOpportunities(
 
-        Pageable pageable
+        @ParameterObject Pageable pageable
 
 ) {
 
