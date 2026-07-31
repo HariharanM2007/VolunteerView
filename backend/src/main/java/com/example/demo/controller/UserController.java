@@ -3,6 +3,8 @@ package com.example.demo.controller;
 import com.example.demo.dto.UserResponseDto;
 import com.example.demo.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springdoc.core.annotations.ParameterObject;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -44,7 +46,7 @@ public ResponseEntity<UserResponseDto> deactivateUser(
     @GetMapping
 public ResponseEntity<Page<UserResponseDto>> getAllUsers(
 
-        Pageable pageable
+        @ParameterObject Pageable pageable
 
 ) {
 
