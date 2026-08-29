@@ -98,7 +98,7 @@ const Register = () => {
               id="email"
               type="email"
               name="email"
-              placeholder="john@example.com"
+              
               value={formData.email}
               onChange={handleChange}
               required
@@ -118,7 +118,7 @@ const Register = () => {
               id="username"
               type="text"
               name="username"
-              placeholder="johndoe"
+              
               value={formData.username}
               onChange={handleChange}
               required
@@ -138,7 +138,7 @@ const Register = () => {
               id="password"
               type="password"
               name="password"
-              placeholder="••••••••"
+              
               value={formData.password}
               onChange={handleChange}
               required
@@ -160,7 +160,7 @@ const Register = () => {
               id="phoneNumber"
               type="tel"
               name="phoneNumber"
-              placeholder="9876543210"
+             
               value={formData.phoneNumber}
               onChange={handleChange}
             />
