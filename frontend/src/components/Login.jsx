@@ -48,7 +48,7 @@ const Login = () => {
     <div className="auth-container">
       <div className="auth-card">
         <div className="auth-header">
-          <div className="logo">🤝</div>
+          <div className="logo"></div>
 
           <h1>VolunteerView</h1>
 
