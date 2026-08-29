@@ -15,7 +15,18 @@ public interface OrganizationRepository extends JpaRepository<Organization, Long
 
     boolean existsByName(String name);
 
+    /*
+     * Kept unchanged so existing code/tests that use this method
+     * are not affected.
+     */
     Optional<Organization> findByCoordinatorId(Long coordinatorId);
+
+    /*
+     * Used when a coordinator can have multiple organizations.
+     * This matches the @ManyToOne relationship between
+     * Organization and SystemUser.
+     */
+    Optional<Organization> findFirstByCoordinatorIdOrderByIdAsc(Long coordinatorId);
 
     List<Organization> findByStatus(OrganizationStatus status);
 
@@ -31,5 +42,4 @@ public interface OrganizationRepository extends JpaRepository<Organization, Long
     List<Organization> findAllByCoordinatorId(
             @Param("coordinatorId") Long coordinatorId
     );
-
 }
