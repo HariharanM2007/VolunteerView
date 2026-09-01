@@ -1,7 +1,9 @@
 import axios from "axios";
 
+const API_BASE_URL = "http://localhost:8081/api";
+
 const api = axios.create({
-  baseURL: "http://localhost:8081/api",
+  baseURL: API_BASE_URL,
   headers: {
     "Content-Type": "application/json",
   },
@@ -10,10 +12,18 @@ const api = axios.create({
 // Add access token to every request
 api.interceptors.request.use(
   (config) => {
-    const user = JSON.parse(localStorage.getItem("user"));
+    const storedUser = localStorage.getItem("user");
 
-    if (user && user.accessToken) {
-      config.headers.Authorization = `Bearer ${user.accessToken}`;
+    if (storedUser) {
+      try {
+        const user = JSON.parse(storedUser);
+
+        if (user?.accessToken) {
+          config.headers.Authorization = `Bearer ${user.accessToken}`;
+        }
+      } catch (error) {
+        console.error("Failed to parse stored user:", error);
+      }
     }
 
     return config;
@@ -24,21 +34,31 @@ api.interceptors.request.use(
 // Handle expired access token
 api.interceptors.response.use(
   (response) => response,
+
   async (error) => {
     const originalRequest = error.config;
 
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    if (
+      error.response?.status === 401 &&
+      !originalRequest?._retry
+    ) {
       originalRequest._retry = true;
 
       try {
-        const user = JSON.parse(localStorage.getItem("user"));
+        const storedUser = localStorage.getItem("user");
 
-        if (!user || !user.refreshToken) {
-          throw new Error("No refresh token available");
+        if (!storedUser) {
+          throw new Error("No authenticated user found.");
+        }
+
+        const user = JSON.parse(storedUser);
+
+        if (!user?.refreshToken) {
+          throw new Error("No refresh token available.");
         }
 
         const response = await axios.post(
-          "http://localhost:8081/api/auth/refresh",
+          `${API_BASE_URL}/auth/refresh`,
           {
             refreshToken: user.refreshToken,
           }
@@ -51,10 +71,10 @@ api.interceptors.response.use(
           accessToken: newAccessToken,
         };
 
-        localStorage.setItem("user", JSON.stringify(updatedUser));
-
-        api.defaults.headers.common.Authorization =
-          `Bearer ${newAccessToken}`;
+        localStorage.setItem(
+          "user",
+          JSON.stringify(updatedUser)
+        );
 
         originalRequest.headers.Authorization =
           `Bearer ${newAccessToken}`;
@@ -62,6 +82,7 @@ api.interceptors.response.use(
         return api(originalRequest);
       } catch (refreshError) {
         localStorage.removeItem("user");
+
         window.location.href = "/login";
 
         return Promise.reject(refreshError);
