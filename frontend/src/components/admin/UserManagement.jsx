@@ -18,7 +18,7 @@ const UserManagement = () => {
 
       const data = await userService.getAll();
 
-      setUsers(data || []);
+      setUsers(data.content || []);
     } catch (err) {
       console.error("Failed to load users:", err);
 
