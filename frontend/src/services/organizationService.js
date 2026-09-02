@@ -10,18 +10,13 @@ const organizationService = {
   },
 
   getById: async (id) => {
-    const response = await api.get(
-      `/organizations/${id}`
-    );
+    const response = await api.get(`/organizations/${id}`);
 
     return response.data;
   },
 
   create: async (data) => {
-    const response = await api.post(
-      "/organizations",
-      data
-    );
+    const response = await api.post("/organizations", data);
 
     return response.data;
   },
