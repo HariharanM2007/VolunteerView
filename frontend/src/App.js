@@ -123,12 +123,12 @@ function App() {
 
           <Route
             path="/users"
-  element={
-    <AdminRoute>
-      <UserManagement />
-    </AdminRoute>
-  }
-/>
+            element={
+              <AdminRoute>
+                <UserManagement />
+              </AdminRoute>
+            }
+          />
 
           <Route
             path="*"
