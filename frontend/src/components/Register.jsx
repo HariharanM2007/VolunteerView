@@ -1,12 +1,12 @@
 import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 
 import { register } from "../store/slices/authSlice";
 
 const Register = () => {
   const dispatch = useDispatch();
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
 
   const { loading, error } = useSelector((state) => state.auth);
 
@@ -47,9 +47,7 @@ const Register = () => {
     if (register.fulfilled.match(result)) {
       setSuccess(true);
 
-      setTimeout(() => {
-        navigate("/");
-      }, 1000);
+
 
       return;
     }
