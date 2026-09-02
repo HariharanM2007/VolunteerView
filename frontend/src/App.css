@@ -36,3 +36,85 @@
     transform: rotate(360deg);
   }
 }
+
+/* ============================= */
+/* Authentication Validation     */
+/* ============================= */
+
+.password-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.password-wrapper input {
+  flex: 1;
+  padding-right: 70px;
+}
+
+.password-toggle {
+  position: absolute;
+  right: 8px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.password-toggle:hover {
+  text-decoration: underline;
+}
+
+.form-group small {
+  display: block;
+  margin-top: 5px;
+  font-size: 12px;
+}
+
+.field-error {
+  margin-top: 5px;
+  font-size: 13px;
+}
+
+.password-rules {
+  margin-top: 10px;
+  padding: 12px;
+  border-radius: 6px;
+  font-size: 13px;
+}
+
+.password-rules p {
+  margin-top: 0;
+  margin-bottom: 7px;
+}
+
+.rule {
+  margin: 4px 0;
+}
+
+.rule.valid {
+  font-weight: 500;
+}
+
+.rule.invalid {
+  font-weight: 500;
+}
+
+.password-warning {
+  margin-top: 10px !important;
+  font-weight: 600;
+}
+
+.password-success {
+  margin-top: 10px !important;
+  font-weight: 600;
+}
+
+.error-message {
+  margin-top: 10px;
+}
+
+.success-message {
+  margin-top: 10px;
+}
