@@ -9,6 +9,7 @@ import { useSelector } from "react-redux";
 
 import Login from "./components/Login";
 import Register from "./components/Register";
+import UserManagement from "./components/admin/UserManagement";
 
 const Placeholder = ({ title }) => {
   return (
