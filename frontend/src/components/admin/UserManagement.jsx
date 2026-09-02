@@ -35,22 +35,44 @@ const UserManagement = () => {
     <div>
       <h1>User Management</h1>
 
-      <p>
-        Manage platform users here.
-      </p>
+      <p>Manage platform users here.</p>
 
-      {loading && (
-        <p>Loading users...</p>
-      )}
+      {loading && <p>Loading users...</p>}
 
-      {error && (
-        <p>{error}</p>
-      )}
+      {error && <p>{error}</p>}
 
       {!loading && !error && (
-        <p>
-          Users found: {users.length}
-        </p>
+        <table>
+          <thead>
+            <tr>
+              <th>Username</th>
+              <th>Email</th>
+              <th>Full Name</th>
+              <th>Role</th>
+              <th>Status</th>
+              <th>Organization</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {users.map((user) => (
+              <tr key={user.id}>
+                <td>{user.username}</td>
+                <td>{user.email}</td>
+                <td>{user.fullName}</td>
+                <td>{user.role}</td>
+                <td>{user.status}</td>
+                <td>
+                  {user.organizationName || "-"}
+                </td>
+                <td>
+                  <button>Actions</button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       )}
     </div>
   );
