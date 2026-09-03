@@ -55,6 +55,7 @@ const AdminRoute = ({ children }) => {
 };
 
 function App() {
+  const { user } = useSelector((state) => state.auth);
   return (
     <div className="app-container">
       <main className="main-content">
