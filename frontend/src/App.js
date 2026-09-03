@@ -11,7 +11,7 @@ import Login from "./components/Login";
 import Register from "./components/Register";
 import UserManagement from "./components/admin/UserManagement";
 import OrganizationList from "./components/organization/OrganizationList";
-import UserManagement from "./components/admin/UserManagement";
+
 
 const Placeholder = ({ title }) => {
   return (
