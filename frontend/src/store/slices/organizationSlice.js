@@ -11,7 +11,7 @@ const initialState = {
 };
 
 export const fetchOrganizations = createAsyncThunk(
-  "organizations/fetchOrganizations",
+  "organizations/fetchAll",
   async ({ page = 0, size = 10 } = {}, thunkAPI) => {
     try {
       return await organizationService.getAll(page, size);
@@ -26,7 +26,7 @@ export const fetchOrganizations = createAsyncThunk(
 );
 
 export const fetchOrganizationById = createAsyncThunk(
-  "organizations/fetchOrganizationById",
+  "organizations/fetchById",
   async (id, thunkAPI) => {
     try {
       return await organizationService.getById(id);
@@ -41,7 +41,7 @@ export const fetchOrganizationById = createAsyncThunk(
 );
 
 export const createOrganization = createAsyncThunk(
-  "organizations/createOrganization",
+  "organizations/create",
   async (data, thunkAPI) => {
     try {
       return await organizationService.create(data);
@@ -56,7 +56,7 @@ export const createOrganization = createAsyncThunk(
 );
 
 export const approveOrganization = createAsyncThunk(
-  "organizations/approveOrganization",
+  "organizations/approve",
   async (id, thunkAPI) => {
     try {
       return await organizationService.approve(id);
@@ -80,7 +80,7 @@ const organizationSlice = createSlice({
   extraReducers: (builder) => {
     builder
 
-      // Fetch organizations
+      // FETCH ALL
       .addCase(fetchOrganizations.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -99,47 +99,18 @@ const organizationSlice = createSlice({
         state.error = action.payload;
       })
 
-      // Fetch organization by ID
-      .addCase(fetchOrganizationById.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-
+      // FETCH BY ID
       .addCase(fetchOrganizationById.fulfilled, (state, action) => {
-        state.loading = false;
         state.selectedItem = action.payload;
       })
 
-      .addCase(fetchOrganizationById.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload;
-      })
-
-      // Create organization
-      .addCase(createOrganization.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-
+      // CREATE
       .addCase(createOrganization.fulfilled, (state, action) => {
-        state.loading = false;
         state.items.unshift(action.payload);
       })
 
-      .addCase(createOrganization.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload;
-      })
-
-      // Approve organization
-      .addCase(approveOrganization.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-
+      // APPROVE
       .addCase(approveOrganization.fulfilled, (state, action) => {
-        state.loading = false;
-
         const index = state.items.findIndex(
           (org) => org.id === action.payload.id
         );
@@ -147,11 +118,6 @@ const organizationSlice = createSlice({
         if (index !== -1) {
           state.items[index] = action.payload;
         }
-      })
-
-      .addCase(approveOrganization.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload;
       });
   },
 });
