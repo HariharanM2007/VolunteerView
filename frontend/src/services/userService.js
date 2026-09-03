@@ -1,26 +1,28 @@
 import api from "./api";
 
+const getAll = async () => {
+  const response = await api.get("/users");
+  return response.data;
+};
+
+const updateStatus = async (id, status) => {
+  const response = await api.patch(`/users/${id}/status`, {
+    status,
+  });
+  return response.data;
+};
+
+const assignOrganization = async (userId, organizationId) => {
+  const response = await api.patch(
+    `/users/${userId}/assign-organization/${organizationId}`
+  );
+  return response.data;
+};
+
 const userService = {
-  getAll: async () => {
-    const response = await api.get("/users");
-    return response.data;
-  },
-
-  updateStatus: async (id, status) => {
-    const response = await api.patch(`/users/${id}/status`, {
-      status,
-    });
-
-    return response.data;
-  },
-
-  assignOrganization: async (id, organizationId) => {
-    const response = await api.patch(
-      `/users/${id}/assign-organization/${organizationId}`
-    );
-
-    return response.data;
-  },
+  getAll,
+  updateStatus,
+  assignOrganization,
 };
 
 export default userService;
