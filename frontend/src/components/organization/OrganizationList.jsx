@@ -6,6 +6,8 @@ import {
   approveOrganization,
 } from "../../store/slices/organizationSlice";
 
+import OrganizationForm from "./OrganizationForm";
+
 const OrganizationList = () => {
   const dispatch = useDispatch();
 
@@ -20,13 +22,12 @@ const OrganizationList = () => {
   const [showForm, setShowForm] = useState(false);
 
   useEffect(() => {
-    dispatch(
-      fetchOrganizations({
-        page: 0,
-        size: 10,
-      })
-    );
+    dispatch(fetchOrganizations({ page: 0, size: 10 }));
   }, [dispatch]);
+
+  const handleApprove = (id) => {
+    dispatch(approveOrganization(id));
+  };
 
   const canCreate =
     user?.role === "PLATFORM_ADMIN" ||
@@ -34,26 +35,20 @@ const OrganizationList = () => {
 
   const isAdmin = user?.role === "PLATFORM_ADMIN";
 
-  const handleApprove = (id) => {
-    dispatch(approveOrganization(id));
-  };
-
-  if (loading && items.length === 0) {
+  if (loading) {
     return (
-      <div className="organizations-page">
-        <div className="loading">
-          Loading organizations...
-        </div>
+      <div className="loading">
+        Loading organizations...
       </div>
     );
   }
 
   return (
-    <div className="organizations-page">
-
+    <div className="page-container">
       <div className="page-header">
         <div>
           <h1>Organizations</h1>
+          <p>Manage non-profit organizations on the platform.</p>
         </div>
 
         {canCreate && (
@@ -74,15 +69,10 @@ const OrganizationList = () => {
 
       {items.length === 0 ? (
         <div className="empty-state">
-          <div className="empty-state-icon">
-            🏢
-          </div>
-
           <h3>No Organizations Found</h3>
 
           <p>
-            Start by adding a non-profit organization
-            to the platform.
+            Start by adding a non-profit organization to the platform.
           </p>
 
           {isAdmin && (
@@ -96,8 +86,7 @@ const OrganizationList = () => {
         </div>
       ) : (
         <div className="table-container">
-          <table className="data-table">
-
+          <table>
             <thead>
               <tr>
                 <th>Name</th>
@@ -111,51 +100,49 @@ const OrganizationList = () => {
             <tbody>
               {items.map((org) => (
                 <tr key={org.id}>
-
                   <td>
                     <strong>{org.name}</strong>
                   </td>
 
                   <td>
-                    <span className="text-truncate">
-                      {org.mission}
-                    </span>
+                    {org.mission?.length > 80
+                      ? `${org.mission.substring(0, 80)}...`
+                      : org.mission}
                   </td>
 
-                  <td>
-                    {org.contactEmail}
-                  </td>
+                  <td>{org.contactEmail}</td>
 
                   <td>
-                    <span
-                      className={`status-badge ${org.status?.toLowerCase()}`}
-                    >
+                    <span className="status-badge">
                       {org.status}
                     </span>
                   </td>
 
                   <td>
-                    {isAdmin &&
-                      org.status === "PENDING" && (
-                        <button
-                          className="secondary-btn"
-                          onClick={() =>
-                            handleApprove(org.id)
-                          }
-                        >
-                          Approve
-                        </button>
-                      )}
+                    {isAdmin && org.status === "PENDING" && (
+                      <button
+                        className="primary-btn"
+                        onClick={() => handleApprove(org.id)}
+                      >
+                        Approve
+                      </button>
+                    )}
                   </td>
-
                 </tr>
               ))}
             </tbody>
-
           </table>
         </div>
       )}
 
+      {showForm && (
+        <OrganizationForm
+          onClose={() => {
+            setShowForm(false);
+            dispatch(fetchOrganizations({ page: 0, size: 10 }));
+          }}
+        />
+      )}
     </div>
   );
 };

@@ -89,11 +89,15 @@ function App() {
           />
 
           <Route
-            path="/organizations"
-            element={
-            user ? <OrganizationList /> : <Navigate to="/login" />
-            }
-          />
+  path="/organizations"
+  element={
+    user ? (
+      <OrganizationList />
+    ) : (
+      <Navigate to="/login" />
+    )
+  }
+/>
 
           <Route
             path="/opportunities"
