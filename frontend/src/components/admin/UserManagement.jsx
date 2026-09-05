@@ -1,178 +1,119 @@
-import React, { useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
-
-import {
-  fetchUsers,
-  updateUserStatus,
-} from "../../store/slices/userSlice";
+import React, { useState, useEffect } from 'react';
+import api from '../../services/api';
 
 const UserManagement = () => {
-  const dispatch = useDispatch();
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const { items, loading, error } = useSelector(
-    (state) => state.users
-  );
-
-  useEffect(() => {
-    dispatch(fetchUsers());
-  }, [dispatch]);
-
-  const handleStatusChange = (id, status) => {
-    dispatch(
-      updateUserStatus({
-        id,
-        status,
-      })
-    );
+  const fetchUsers = async () => {
+    try {
+      setLoading(true);
+      const response = await api.get('/users');
+      setUsers(response.data || []);
+    } catch (err) {
+      // Error handling
+    } finally {
+      setLoading(false);
+    }
   };
 
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  const handleStatusChange = async (userId, newStatus) => {
+    try {
+      await api.patch(`/users/${userId}/status`, { status: newStatus });
+      fetchUsers();
+    } catch (err) {
+      // Error handling
+    }
+  };
+
+  const handleAssignOrg = async (userId) => {
+    const orgId = prompt('Enter Organization ID to assign:');
+    if (orgId && !isNaN(orgId)) {
+      try {
+        await api.patch(`/users/${userId}/assign-organization/${orgId}`);
+        fetchUsers();
+      } catch (err) {
+        // Error handling
+      }
+    }
+  };
+
+  if (loading) {
+    return <div className="loading">Loading platform users...</div>;
+  }
+
   return (
-    <div className="admin-page">
+    <div className="page-container">
       <div className="page-header">
-        <div>
-          <h1>User Management</h1>
-          <p>Manage platform users here.</p>
-        </div>
+        <h1>User Management</h1>
       </div>
 
-      {loading && (
-        <div className="loading">
-          Loading users...
-        </div>
-      )}
-
-      {error && (
-        <div className="error-message">
-          {error.message || "Failed to load users."}
-        </div>
-      )}
-
-      {!loading && !error && items.length === 0 && (
-        <div className="empty-state">
-          <h3>No Users Found</h3>
-          <p>There are no users registered on the platform.</p>
-        </div>
-      )}
-
-      {!loading && items.length > 0 && (
-        <div className="table-container">
-          <table className="data-table">
-            <thead>
-              <tr>
-                <th>Username</th>
-                <th>Email</th>
-                <th>Full Name</th>
-                <th>Role</th>
-                <th>Status</th>
-                <th>Organization</th>
-                <th>Actions</th>
+      <div className="table-responsive">
+        <table className="data-table">
+          <thead>
+            <tr>
+              <th>Username</th>
+              <th>Full Name</th>
+              <th>Email</th>
+              <th>Role</th>
+              <th>Status</th>
+              <th>Organization</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {users.map((u) => (
+              <tr key={u.id}>
+                <td>
+                  <strong>{u.username}</strong>
+                </td>
+                <td>{u.fullName}</td>
+                <td>{u.email}</td>
+                <td>{u.role}</td>
+                <td>
+                  <span className={`status-badge status-${u.status?.toLowerCase()}`}>
+                    {u.status}
+                  </span>
+                </td>
+                <td>{u.organizationName || 'None'}</td>
+                <td>
+                  <div className="action-buttons">
+                    {u.status === 'PENDING' && (
+                      <button
+                        type="button"
+                        className="action-btn approve-btn"
+                        onClick={() => handleStatusChange(u.id, 'APPROVED')}
+                      >
+                        Approve
+                      </button>
+                    )}
+                    {u.status === 'APPROVED' && (
+                      <button
+                        type="button"
+                        className="action-btn reject-btn"
+                        onClick={() => handleStatusChange(u.id, 'DEACTIVATED')}
+                      >
+                        Deactivate
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      className="action-btn secondary-btn"
+                      onClick={() => handleAssignOrg(u.id)}
+                    >
+                      Assign Org
+                    </button>
+                  </div>
+                </td>
               </tr>
-            </thead>
-
-            <tbody>
-              {items.map((user) => (
-                <tr key={user.id}>
-                  <td>
-                    <strong>{user.username}</strong>
-                  </td>
-
-                  <td>{user.email}</td>
-
-                  <td>{user.fullName}</td>
-
-                  <td>{user.role}</td>
-
-                  <td>
-                    <span className="status-badge">
-                      {user.status}
-                    </span>
-                  </td>
-
-                  <td>
-                    {user.organizationName || "-"}
-                  </td>
-
-                  <td>
-                    <div className="action-buttons">
-
-                      {user.status === "PENDING" && (
-                        <>
-                          <button
-                            className="primary-btn"
-                            onClick={() =>
-                              handleStatusChange(
-                                user.id,
-                                "APPROVED"
-                              )
-                            }
-                          >
-                            Approve
-                          </button>
-
-                          <button
-                            className="secondary-btn"
-                            onClick={() =>
-                              handleStatusChange(
-                                user.id,
-                                "REJECTED"
-                              )
-                            }
-                          >
-                            Reject
-                          </button>
-                        </>
-                      )}
-
-                      {user.status === "APPROVED" && (
-                        <button
-                          className="danger-btn"
-                          onClick={() =>
-                            handleStatusChange(
-                              user.id,
-                              "DEACTIVATED"
-                            )
-                          }
-                        >
-                          Deactivate
-                        </button>
-                      )}
-
-                      {user.status === "REJECTED" && (
-                        <button
-                          className="primary-btn"
-                          onClick={() =>
-                            handleStatusChange(
-                              user.id,
-                              "APPROVED"
-                            )
-                          }
-                        >
-                          Approve
-                        </button>
-                      )}
-
-                      {user.status === "DEACTIVATED" && (
-                        <button
-                          className="primary-btn"
-                          onClick={() =>
-                            handleStatusChange(
-                              user.id,
-                              "APPROVED"
-                            )
-                          }
-                        >
-                          Reactivate
-                        </button>
-                      )}
-
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 };
