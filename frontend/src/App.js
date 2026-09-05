@@ -1,150 +1,87 @@
-import React from "react";
-import {
-  Navigate,
-  Route,
-  Routes,
-} from "react-router-dom";
+import React from 'react';
+import { Routes, Route, Navigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 
-import { useSelector } from "react-redux";
+// Layout & Common
+import Navbar from './components/layout/Navbar';
+import NotificationStack from './components/NotificationStack';
 
-import Login from "./components/Login";
-import Register from "./components/Register";
-import UserManagement from "./components/admin/UserManagement";
-import OrganizationList from "./components/organization/OrganizationList";
+// Auth Components
+import Login from './components/Login';
+import Register from './components/Register';
 
+// Views
+import Home from './components/dashboard/Home';
+import OrganizationList from './components/organization/OrganizationList';
+import OpportunityList from './components/opportunity/OpportunityList';
+import EnrollmentList from './components/enrollment/EnrollmentList';
+import ImpactReportList from './components/impact-report/ImpactReportList';
+import UserManagement from './components/admin/UserManagement';
 
-const Placeholder = ({ title }) => {
-  return (
-    <div className="dashboard">
-      <h1>{title}</h1>
-    </div>
-  );
-};
+const App = () => {
+  const user = useSelector((state) => state.auth?.user);
 
-const ProtectedRoute = ({ children }) => {
-  const { user } = useSelector((state) => state.auth);
-
-  if (!user) {
-    return <Navigate to="/login" replace />;
-  }
-
-  return children;
-};
-
-const PublicRoute = ({ children }) => {
-  const { user } = useSelector((state) => state.auth);
-
-  if (user) {
-    return <Navigate to="/" replace />;
-  }
-
-  return children;
-};
-
-const AdminRoute = ({ children }) => {
-  const { user } = useSelector((state) => state.auth);
-
-  if (!user) {
-    return <Navigate to="/login" replace />;
-  }
-
-  if (user.role !== "PLATFORM_ADMIN") {
-    return <Navigate to="/" replace />;
-  }
-
-  return children;
-};
-
-function App() {
-  const { user } = useSelector((state) => state.auth);
   return (
     <div className="app-container">
+      {user && <Navbar />}
+      <NotificationStack />
+      
       <main className="main-content">
         <Routes>
+          {/* Public Routes */}
           <Route
             path="/login"
-            element={
-              <PublicRoute>
-                <Login />
-              </PublicRoute>
-            }
+            element={user ? <Navigate to="/" replace /> : <Login />}
           />
-
           <Route
             path="/register"
-            element={
-              <PublicRoute>
-                <Register />
-              </PublicRoute>
-            }
+            element={user ? <Navigate to="/" replace /> : <Register />}
           />
 
+          {/* Protected Routes */}
           <Route
             path="/"
-            element={
-              <ProtectedRoute>
-                <Placeholder title="Dashboard" />
-              </ProtectedRoute>
-            }
+            element={user ? <Home /> : <Navigate to="/login" replace />}
           />
-
           <Route
-  path="/organizations"
-  element={
-    user ? (
-      <OrganizationList />
-    ) : (
-      <Navigate to="/login" />
-    )
-  }
-/>
-
+            path="/organizations"
+            element={user ? <OrganizationList /> : <Navigate to="/login" replace />}
+          />
           <Route
             path="/opportunities"
-            element={
-              <ProtectedRoute>
-                <Placeholder title="Volunteer Opportunities" />
-              </ProtectedRoute>
-            }
+            element={user ? <OpportunityList /> : <Navigate to="/login" replace />}
           />
-
           <Route
             path="/enrollments"
-            element={
-              <ProtectedRoute>
-                <Placeholder title="Volunteer Enrollments" />
-              </ProtectedRoute>
-            }
+            element={user ? <EnrollmentList /> : <Navigate to="/login" replace />}
           />
-
           <Route
             path="/impact-reports"
-            element={
-              <ProtectedRoute>
-                <Placeholder title="Community Impact Reports" />
-              </ProtectedRoute>
-            }
+            element={user ? <ImpactReportList /> : <Navigate to="/login" replace />}
           />
 
+          {/* Admin Protected Route */}
           <Route
             path="/users"
             element={
-            user?.role === "PLATFORM_ADMIN" ? (
-            <UserManagement />
-            ) : (
-            <Navigate to="/" />
-            )
-          }
-        />
-
-          <Route
-            path="*"
-            element={<Navigate to="/" replace />}
+              user ? (
+                user.role === 'PLATFORM_ADMIN' ? (
+                  <UserManagement />
+                ) : (
+                  <Navigate to="/" replace />
+                )
+              ) : (
+                <Navigate to="/login" replace />
+              )
+            }
           />
+
+          {/* Fallback */}
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>
     </div>
   );
-}
+};
 
 export default App;
