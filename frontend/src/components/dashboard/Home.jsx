@@ -11,12 +11,20 @@ const Home = () => {
   const [stats, setStats] = useState(null);
 
   useEffect(() => {
+    let isMounted = true;
     if (user?.role === 'PLATFORM_ADMIN') {
-      impactReportService
-        .getStats()
-        .then((data) => setStats(data))
-        .catch(() => {});
+      const statsPromise = impactReportService.getStats();
+      if (statsPromise && typeof statsPromise.then === 'function') {
+        statsPromise
+          .then((data) => {
+            if (isMounted) setStats(data);
+          })
+          .catch(() => {});
+      }
     }
+    return () => {
+      isMounted = false;
+    };
   }, [user]);
 
   const handleExploreClick = () => {
