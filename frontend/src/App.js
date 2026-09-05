@@ -1,5 +1,5 @@
 import React from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 
 // Layout & Common
@@ -18,14 +18,14 @@ import EnrollmentList from './components/enrollment/EnrollmentList';
 import ImpactReportList from './components/impact-report/ImpactReportList';
 import UserManagement from './components/admin/UserManagement';
 
-const App = () => {
+const AppContent = () => {
   const user = useSelector((state) => state.auth?.user);
 
   return (
     <div className="app-container">
       {user && <Navbar />}
       <NotificationStack />
-      
+
       <main className="main-content">
         <Routes>
           {/* Public Routes */}
@@ -81,6 +81,14 @@ const App = () => {
         </Routes>
       </main>
     </div>
+  );
+};
+
+const App = () => {
+  return (
+    <BrowserRouter>
+      <AppContent />
+    </BrowserRouter>
   );
 };
 

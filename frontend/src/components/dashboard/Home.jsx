@@ -1,11 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
 import impactReportService from '../../services/impactReportService';
 import StatCards from './StatCards';
 
 const Home = () => {
-  const navigate = useNavigate();
   const user = useSelector((state) => state.auth?.user);
   const enrollments = useSelector(
     (state) => state.enrollments?.items || state.enrollments?.enrollments || []
@@ -20,6 +18,10 @@ const Home = () => {
         .catch(() => {});
     }
   }, [user]);
+
+  const handleExploreClick = () => {
+    window.location.href = '/opportunities';
+  };
 
   return (
     <div className="dashboard">
@@ -67,7 +69,7 @@ const Home = () => {
           <button
             type="button"
             className="primary-btn"
-            onClick={() => navigate('/opportunities')}
+            onClick={handleExploreClick}
           >
             Explore Opportunities
           </button>
