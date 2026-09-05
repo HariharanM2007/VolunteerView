@@ -1,94 +1,57 @@
-import axios from "axios";
-
-const API_BASE_URL = "http://localhost:8080/api";
+import axios from 'axios';
 
 const api = axios.create({
-  baseURL: API_BASE_URL,
+  baseURL: 'http://localhost:8080/api',
   headers: {
-    "Content-Type": "application/json",
+    'Content-Type': 'application/json',
   },
 });
 
-// Add access token to every request
 api.interceptors.request.use(
   (config) => {
-    const storedUser = localStorage.getItem("user");
-
-    if (storedUser) {
+    const userStr = localStorage.getItem('user');
+    if (userStr) {
       try {
-        const user = JSON.parse(storedUser);
-
-        if (user?.accessToken) {
+        const user = JSON.parse(userStr);
+        if (user && user.accessToken) {
           config.headers.Authorization = `Bearer ${user.accessToken}`;
         }
-      } catch (error) {
-        console.error("Failed to parse stored user:", error);
+      } catch (e) {
+        // Ignore parse error
       }
     }
-
     return config;
   },
   (error) => Promise.reject(error)
 );
 
-// Handle expired access token
 api.interceptors.response.use(
   (response) => response,
-
   async (error) => {
     const originalRequest = error.config;
-
-    if (
-      error.response?.status === 401 &&
-      !originalRequest?._retry
-    ) {
+    if (error.response && error.response.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
-
-      try {
-        const storedUser = localStorage.getItem("user");
-
-        if (!storedUser) {
-          throw new Error("No authenticated user found.");
-        }
-
-        const user = JSON.parse(storedUser);
-
-        if (!user?.refreshToken) {
-          throw new Error("No refresh token available.");
-        }
-
-        const response = await axios.post(
-          `${API_BASE_URL}/auth/refresh`,
-          {
-            refreshToken: user.refreshToken,
+      const userStr = localStorage.getItem('user');
+      if (userStr) {
+        try {
+          const user = JSON.parse(userStr);
+          if (user && user.refreshToken) {
+            const response = await axios.post('http://localhost:8080/api/auth/refresh', {
+              refreshToken: user.refreshToken,
+            });
+            const updatedUser = { ...user, accessToken: response.data.accessToken };
+            localStorage.setItem('user', JSON.stringify(updatedUser));
+            api.defaults.headers.common.Authorization = `Bearer ${response.data.accessToken}`;
+            originalRequest.headers.Authorization = `Bearer ${response.data.accessToken}`;
+            return api(originalRequest);
           }
-        );
-
-        const newAccessToken = response.data.accessToken;
-
-        const updatedUser = {
-          ...user,
-          accessToken: newAccessToken,
-        };
-
-        localStorage.setItem(
-          "user",
-          JSON.stringify(updatedUser)
-        );
-
-        originalRequest.headers.Authorization =
-          `Bearer ${newAccessToken}`;
-
-        return api(originalRequest);
-      } catch (refreshError) {
-        localStorage.removeItem("user");
-
-        window.location.href = "/login";
-
-        return Promise.reject(refreshError);
+        } catch (refreshError) {
+          localStorage.removeItem('user');
+          window.location.href = '/login';
+          return Promise.reject(refreshError);
+        }
       }
     }
-
     return Promise.reject(error);
   }
 );
