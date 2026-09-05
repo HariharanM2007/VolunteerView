@@ -9,9 +9,18 @@ const UserManagement = () => {
     try {
       setLoading(true);
       const response = await api.get('/users');
-      setUsers(response.data || []);
+      const data = response?.data;
+
+      // Extract array safely from List or Page object
+      if (Array.isArray(data)) {
+        setUsers(data);
+      } else if (Array.isArray(data?.content)) {
+        setUsers(data.content);
+      } else {
+        setUsers([]);
+      }
     } catch (err) {
-      // Error handling
+      setUsers([]);
     } finally {
       setLoading(false);
     }
@@ -46,6 +55,8 @@ const UserManagement = () => {
     return <div className="loading">Loading platform users...</div>;
   }
 
+  const userList = Array.isArray(users) ? users : [];
+
   return (
     <div className="page-container">
       <div className="page-header">
@@ -66,51 +77,59 @@ const UserManagement = () => {
             </tr>
           </thead>
           <tbody>
-            {users.map((u) => (
-              <tr key={u.id}>
-                <td>
-                  <strong>{u.username}</strong>
-                </td>
-                <td>{u.fullName}</td>
-                <td>{u.email}</td>
-                <td>{u.role}</td>
-                <td>
-                  <span className={`status-badge status-${u.status?.toLowerCase()}`}>
-                    {u.status}
-                  </span>
-                </td>
-                <td>{u.organizationName || 'None'}</td>
-                <td>
-                  <div className="action-buttons">
-                    {u.status === 'PENDING' && (
-                      <button
-                        type="button"
-                        className="action-btn approve-btn"
-                        onClick={() => handleStatusChange(u.id, 'APPROVED')}
-                      >
-                        Approve
-                      </button>
-                    )}
-                    {u.status === 'APPROVED' && (
-                      <button
-                        type="button"
-                        className="action-btn reject-btn"
-                        onClick={() => handleStatusChange(u.id, 'DEACTIVATED')}
-                      >
-                        Deactivate
-                      </button>
-                    )}
-                    <button
-                      type="button"
-                      className="action-btn secondary-btn"
-                      onClick={() => handleAssignOrg(u.id)}
-                    >
-                      Assign Org
-                    </button>
-                  </div>
+            {userList.length === 0 ? (
+              <tr>
+                <td colSpan="7" style={{ textAlign: 'center', padding: '2rem' }}>
+                  No users found.
                 </td>
               </tr>
-            ))}
+            ) : (
+              userList.map((u) => (
+                <tr key={u.id}>
+                  <td>
+                    <strong>{u.username}</strong>
+                  </td>
+                  <td>{u.fullName}</td>
+                  <td>{u.email}</td>
+                  <td>{u.role}</td>
+                  <td>
+                    <span className={`status-badge status-${u.status?.toLowerCase()}`}>
+                      {u.status}
+                    </span>
+                  </td>
+                  <td>{u.organizationName || 'None'}</td>
+                  <td>
+                    <div className="action-buttons">
+                      {u.status === 'PENDING' && (
+                        <button
+                          type="button"
+                          className="action-btn approve-btn"
+                          onClick={() => handleStatusChange(u.id, 'APPROVED')}
+                        >
+                          Approve
+                        </button>
+                      )}
+                      {u.status === 'APPROVED' && (
+                        <button
+                          type="button"
+                          className="action-btn reject-btn"
+                          onClick={() => handleStatusChange(u.id, 'DEACTIVATED')}
+                        >
+                          Deactivate
+                        </button>
+                      )}
+                      <button
+                        type="button"
+                        className="action-btn secondary-btn"
+                        onClick={() => handleAssignOrg(u.id)}
+                      >
+                        Assign Org
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>
