@@ -1,160 +1,155 @@
-import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import enrollmentService from "../../services/enrollmentService";
-
-const initialState = {
-  enrollments: [],
-  loading: false,
-  error: null,
-  totalPages: 0,
-  filterStatus: "ALL",
-};
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import enrollmentService from '../../services/enrollmentService';
 
 export const fetchEnrollments = createAsyncThunk(
-  "enrollments/fetchEnrollments",
-  async (_, thunkAPI) => {
+  'enrollments/fetchEnrollments',
+  async ({ page = 0, size = 10 } = {}, { getState, rejectWithValue }) => {
     try {
-      const user = thunkAPI.getState().auth.user;
+      const { auth } = getState();
+      const user = auth.user;
 
-      if (user?.role === "VOLUNTEER") {
-        return await enrollmentService.getMyEnrollments();
+      if (!user) {
+        return rejectWithValue({ message: 'User not authenticated' });
       }
 
-      if (user?.role === "ORGANIZATION_COORDINATOR") {
+      if (user.role === 'VOLUNTEER') {
+        const data = await enrollmentService.getMyEnrollments(page, size);
+        return data;
+      } else if (user.role === 'ORGANIZATION_COORDINATOR') {
         if (!user.organizationId) {
-          return thunkAPI.rejectWithValue({
-            message: "You are not assigned to any organization.",
-          });
+          return rejectWithValue({ message: 'You are not assigned to any organization.' });
         }
-
-        return await enrollmentService.getEnrollmentsByOrg(
-          user.organizationId
-        );
+        const data = await enrollmentService.getEnrollmentsByOrg(user.organizationId, page, size);
+        return data;
+      } else {
+        const data = await enrollmentService.getAll(page, size);
+        return data;
       }
-
-      return await enrollmentService.getAll();
-    } catch (error) {
-      return thunkAPI.rejectWithValue(
-        error.response?.data || error
-      );
+    } catch (err) {
+      return rejectWithValue(err.response?.data || { message: err.message });
     }
   }
 );
 
 export const enrollInOpportunity = createAsyncThunk(
-  "enrollments/enrollInOpportunity",
-  async (data, thunkAPI) => {
+  'enrollments/enrollInOpportunity',
+  async (enrollData, { rejectWithValue }) => {
     try {
-      return await enrollmentService.enroll(data);
-    } catch (error) {
-      return thunkAPI.rejectWithValue(
-        error.response?.data || error
-      );
+      const data = await enrollmentService.enroll(enrollData);
+      return data;
+    } catch (err) {
+      return rejectWithValue(err.response?.data || { message: err.message });
     }
   }
 );
 
 export const approveEnrollment = createAsyncThunk(
-  "enrollments/approveEnrollment",
-  async (id, thunkAPI) => {
+  'enrollments/approveEnrollment',
+  async (id, { rejectWithValue }) => {
     try {
-      return await enrollmentService.approve(id);
-    } catch (error) {
-      return thunkAPI.rejectWithValue(
-        error.response?.data || error
-      );
+      const data = await enrollmentService.approve(id);
+      return data;
+    } catch (err) {
+      return rejectWithValue(err.response?.data || { message: err.message });
     }
   }
 );
 
 export const rejectEnrollment = createAsyncThunk(
-  "enrollments/rejectEnrollment",
-  async (id, thunkAPI) => {
+  'enrollments/rejectEnrollment',
+  async (id, { rejectWithValue }) => {
     try {
-      return await enrollmentService.reject(id);
-    } catch (error) {
-      return thunkAPI.rejectWithValue(
-        error.response?.data || error
-      );
+      const data = await enrollmentService.reject(id);
+      return data;
+    } catch (err) {
+      return rejectWithValue(err.response?.data || { message: err.message });
     }
   }
 );
 
 export const checkInEnrollment = createAsyncThunk(
-  "enrollments/checkInEnrollment",
-  async (id, thunkAPI) => {
+  'enrollments/checkInEnrollment',
+  async (id, { rejectWithValue }) => {
     try {
-      return await enrollmentService.checkIn(id);
-    } catch (error) {
-      return thunkAPI.rejectWithValue(
-        error.response?.data || error
-      );
+      const data = await enrollmentService.checkIn(id);
+      return data;
+    } catch (err) {
+      return rejectWithValue(err.response?.data || { message: err.message });
     }
   }
 );
 
 export const completeEnrollment = createAsyncThunk(
-  "enrollments/completeEnrollment",
-  async ({ id, hours }, thunkAPI) => {
+  'enrollments/completeEnrollment',
+  async ({ id, hours }, { rejectWithValue }) => {
     try {
-      return await enrollmentService.complete(id, hours);
-    } catch (error) {
-      return thunkAPI.rejectWithValue(
-        error.response?.data || error
-      );
+      const data = await enrollmentService.complete(id, hours);
+      return data;
+    } catch (err) {
+      return rejectWithValue(err.response?.data || { message: err.message });
     }
   }
 );
 
-const replaceEnrollment = (state, action) => {
-  const index = state.enrollments.findIndex(
-    (item) => item.id === action.payload.id
-  );
-
-  if (index !== -1) {
-    state.enrollments[index] = action.payload;
-  }
+const initialState = {
+  enrollments: [],
+  items: [],
+  loading: false,
+  error: null,
+  totalPages: 0,
+  filterStatus: 'ALL',
 };
 
 const enrollmentSlice = createSlice({
-  name: "enrollments",
+  name: 'enrollments',
   initialState,
-
   reducers: {
     setFilterStatus: (state, action) => {
       state.filterStatus = action.payload;
     },
   },
-
   extraReducers: (builder) => {
     builder
+      // fetchEnrollments
       .addCase(fetchEnrollments.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-
       .addCase(fetchEnrollments.fulfilled, (state, action) => {
         state.loading = false;
-        state.enrollments =
-          action.payload.content || action.payload || [];
+        const list = action.payload.content || action.payload || [];
+        state.enrollments = list;
+        state.items = list;
         state.totalPages = action.payload.totalPages || 0;
       })
-
       .addCase(fetchEnrollments.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       })
-
+      // enrollInOpportunity
       .addCase(enrollInOpportunity.fulfilled, (state, action) => {
         state.enrollments.unshift(action.payload);
+        state.items.unshift(action.payload);
       })
-
-      .addCase(approveEnrollment.fulfilled, replaceEnrollment)
-      .addCase(rejectEnrollment.fulfilled, replaceEnrollment)
-      .addCase(checkInEnrollment.fulfilled, replaceEnrollment)
-      .addCase(completeEnrollment.fulfilled, replaceEnrollment);
+      // Status update actions
+      .addMatcher(
+        (action) =>
+          [
+            approveEnrollment.fulfilled.type,
+            rejectEnrollment.fulfilled.type,
+            checkInEnrollment.fulfilled.type,
+            completeEnrollment.fulfilled.type,
+          ].includes(action.type),
+        (state, action) => {
+          const index = state.enrollments.findIndex((e) => e.id === action.payload.id);
+          if (index !== -1) {
+            state.enrollments[index] = action.payload;
+            state.items[index] = action.payload;
+          }
+        }
+      );
   },
 });
 
 export const { setFilterStatus } = enrollmentSlice.actions;
-
 export default enrollmentSlice.reducer;

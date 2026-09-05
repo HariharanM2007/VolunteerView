@@ -1,5 +1,53 @@
-import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import organizationService from "../../services/organizationService";
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import organizationService from '../../services/organizationService';
+
+export const fetchOrganizations = createAsyncThunk(
+  'organizations/fetchOrganizations',
+  async ({ page = 0, size = 10 } = {}, { rejectWithValue }) => {
+    try {
+      const data = await organizationService.getAll(page, size);
+      return data;
+    } catch (err) {
+      return rejectWithValue(err.response?.data || { message: err.message });
+    }
+  }
+);
+
+export const fetchOrganizationById = createAsyncThunk(
+  'organizations/fetchOrganizationById',
+  async (id, { rejectWithValue }) => {
+    try {
+      const data = await organizationService.getById(id);
+      return data;
+    } catch (err) {
+      return rejectWithValue(err.response?.data || { message: err.message });
+    }
+  }
+);
+
+export const createOrganization = createAsyncThunk(
+  'organizations/createOrganization',
+  async (orgData, { rejectWithValue }) => {
+    try {
+      const data = await organizationService.create(orgData);
+      return data;
+    } catch (err) {
+      return rejectWithValue(err.response?.data || { message: err.message });
+    }
+  }
+);
+
+export const approveOrganization = createAsyncThunk(
+  'organizations/approveOrganization',
+  async (id, { rejectWithValue }) => {
+    try {
+      const data = await organizationService.approve(id);
+      return data;
+    } catch (err) {
+      return rejectWithValue(err.response?.data || { message: err.message });
+    }
+  }
+);
 
 const initialState = {
   items: [],
@@ -10,111 +58,38 @@ const initialState = {
   totalElements: 0,
 };
 
-export const fetchOrganizations = createAsyncThunk(
-  "organizations/fetchAll",
-  async ({ page = 0, size = 10 } = {}, thunkAPI) => {
-    try {
-      return await organizationService.getAll(page, size);
-    } catch (error) {
-      return thunkAPI.rejectWithValue(
-        error.response?.data || {
-          message: "Failed to fetch organizations.",
-        }
-      );
-    }
-  }
-);
-
-export const fetchOrganizationById = createAsyncThunk(
-  "organizations/fetchById",
-  async (id, thunkAPI) => {
-    try {
-      return await organizationService.getById(id);
-    } catch (error) {
-      return thunkAPI.rejectWithValue(
-        error.response?.data || {
-          message: "Failed to fetch organization.",
-        }
-      );
-    }
-  }
-);
-
-export const createOrganization = createAsyncThunk(
-  "organizations/create",
-  async (data, thunkAPI) => {
-    try {
-      return await organizationService.create(data);
-    } catch (error) {
-      return thunkAPI.rejectWithValue(
-        error.response?.data || {
-          message: "Failed to create organization.",
-        }
-      );
-    }
-  }
-);
-
-export const approveOrganization = createAsyncThunk(
-  "organizations/approve",
-  async (id, thunkAPI) => {
-    try {
-      return await organizationService.approve(id);
-    } catch (error) {
-      return thunkAPI.rejectWithValue(
-        error.response?.data || {
-          message: "Failed to approve organization.",
-        }
-      );
-    }
-  }
-);
-
 const organizationSlice = createSlice({
-  name: "organizations",
-
+  name: 'organizations',
   initialState,
-
   reducers: {},
-
   extraReducers: (builder) => {
     builder
-
-      // FETCH ALL
+      // fetchOrganizations
       .addCase(fetchOrganizations.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-
       .addCase(fetchOrganizations.fulfilled, (state, action) => {
         state.loading = false;
-
-        state.items = action.payload.content || [];
+        state.items = action.payload.content || action.payload || [];
         state.totalPages = action.payload.totalPages || 0;
         state.totalElements = action.payload.totalElements || 0;
       })
-
       .addCase(fetchOrganizations.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       })
-
-      // FETCH BY ID
+      // fetchOrganizationById
       .addCase(fetchOrganizationById.fulfilled, (state, action) => {
         state.selectedItem = action.payload;
       })
-
-      // CREATE
+      // createOrganization
       .addCase(createOrganization.fulfilled, (state, action) => {
         state.items.unshift(action.payload);
       })
-
-      // APPROVE
+      // approveOrganization
       .addCase(approveOrganization.fulfilled, (state, action) => {
-        const index = state.items.findIndex(
-          (org) => org.id === action.payload.id
-        );
-
+        const index = state.items.findIndex((org) => org.id === action.payload.id);
         if (index !== -1) {
           state.items[index] = action.payload;
         }
