@@ -10,23 +10,24 @@ const useFetch = (url, options = {}) => {
     let isMounted = true;
     if (!url) return;
 
-    try {
-      const result = api?.get?.(url, options);
-      if (result && typeof result.then === 'function') {
-        result
-          .then((response) => {
-            if (isMounted && response) {
-              setData(response.data);
-            }
-          })
-          .catch((err) => {
-            if (isMounted) {
-              setError(err?.response?.data || err?.message);
-            }
-          });
-      }
-    } catch (e) {
-      // Prevent mock execution from crashing test runs
+    setLoading(true);
+
+    const result = api.get(url, options);
+    if (result && typeof result.then === 'function') {
+      result
+        .then((response) => {
+          if (isMounted && response) {
+            setData(response.data);
+          }
+        })
+        .catch((err) => {
+          if (isMounted) {
+            setError(err?.response?.data || err?.message);
+          }
+        })
+        .finally(() => {
+          if (isMounted) setLoading(false);
+        });
     }
 
     return () => {
