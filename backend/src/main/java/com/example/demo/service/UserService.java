@@ -1,9 +1,11 @@
 package com.example.demo.service;
 
 import com.example.demo.dto.UserResponseDto;
+import com.example.demo.entity.Organization;
 import com.example.demo.entity.SystemUser;
 import com.example.demo.enums.UserStatus;
 import com.example.demo.exception.ResourceNotFoundException;
+import com.example.demo.repository.OrganizationRepository;
 import com.example.demo.repository.SystemUserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +18,8 @@ import org.springframework.stereotype.Service;
 public class UserService {
 
     private final SystemUserRepository userRepository;
+
+    private final OrganizationRepository organizationRepository;
 
 
     @Transactional
@@ -70,8 +74,43 @@ public UserResponseDto getUserById(Long id) {
 
     }
 
-    
+    @Transactional
+    public UserResponseDto updateStatus(Long id, String statusStr) {
 
+        SystemUser user = userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found."));
+
+        user.setStatus(UserStatus.valueOf(statusStr.toUpperCase()));
+
+        userRepository.save(user);
+
+        return mapToResponseDto(user);
+    }
+
+    @Transactional
+    public UserResponseDto assignOrganization(Long userId, Long orgId) {
+
+        SystemUser user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User", userId));
+
+        Organization org = organizationRepository.findById(orgId)
+                .orElseThrow(() -> new ResourceNotFoundException("Organization", orgId));
+
+        user.setOrganization(org);
+
+        userRepository.save(user);
+
+        return mapToResponseDto(user);
+    }
+
+    @Transactional
+    public java.util.List<UserResponseDto> getAllUsersList() {
+
+        return userRepository.findAll()
+                .stream()
+                .map(this::mapToResponseDto)
+                .toList();
+    }
 
     private UserResponseDto mapToResponseDto(SystemUser user) {
 
