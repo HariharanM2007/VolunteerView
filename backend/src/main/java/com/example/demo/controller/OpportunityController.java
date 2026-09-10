@@ -13,6 +13,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,6 +28,7 @@ public class OpportunityController {
     private final SystemUserRepository systemUserRepository;
 
     @PostMapping
+    @PreAuthorize("hasAnyRole('PLATFORM_ADMIN', 'ORGANIZATION_COORDINATOR')")
     public ResponseEntity<OpportunityResponseDto> create(
 
         @AuthenticationPrincipal
@@ -45,6 +47,7 @@ public class OpportunityController {
     }
 
      @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('PLATFORM_ADMIN', 'ORGANIZATION_COORDINATOR')")
 public ResponseEntity<OpportunityResponseDto> updateOpportunity(
 
         @PathVariable Long id,
@@ -64,6 +67,7 @@ public ResponseEntity<OpportunityResponseDto> updateOpportunity(
     }
 
     @PatchMapping("/{id}/publish")
+    @PreAuthorize("hasAnyRole('PLATFORM_ADMIN', 'ORGANIZATION_COORDINATOR')")
 public ResponseEntity<OpportunityResponseDto> publishOpportunity(
 
         @PathVariable Long id,
@@ -80,6 +84,7 @@ public ResponseEntity<OpportunityResponseDto> publishOpportunity(
     }
 
     @PatchMapping("/{id}/close")
+    @PreAuthorize("hasAnyRole('PLATFORM_ADMIN', 'ORGANIZATION_COORDINATOR')")
 public ResponseEntity<OpportunityResponseDto> closeOpportunity(
 
         @PathVariable Long id,
@@ -96,6 +101,7 @@ public ResponseEntity<OpportunityResponseDto> closeOpportunity(
     }
 
     @PatchMapping("/{id}/complete")
+    @PreAuthorize("hasAnyRole('PLATFORM_ADMIN', 'ORGANIZATION_COORDINATOR')")
 public ResponseEntity<OpportunityResponseDto> completeOpportunity(
 
         @PathVariable Long id,
@@ -112,6 +118,7 @@ public ResponseEntity<OpportunityResponseDto> completeOpportunity(
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyRole('PLATFORM_ADMIN', 'ORGANIZATION_COORDINATOR')")
 public ResponseEntity<Void> deleteOpportunity(
 
         @PathVariable Long id,

@@ -16,6 +16,8 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import java.util.List;
 
 @Service
@@ -95,6 +97,29 @@ public ImpactReportResponseDto submitImpactReport(
 
     }
 
+
+    @Transactional
+public Page<ImpactReportResponseDto> getAllReports(Pageable pageable) {
+    return impactReportRepository.findAll(pageable).map(this::mapToResponseDto);
+    }
+
+    @Transactional
+public Page<ImpactReportResponseDto> getReportsByVolunteerPaged(Long volunteerId, Pageable pageable) {
+    return impactReportRepository.findByVolunteerId(volunteerId, pageable).map(this::mapToResponseDto);
+    }
+
+    @Transactional
+public ImpactSummaryDto getOrganizationImpactSummary(Long orgId) {
+    Double totalHours = impactReportRepository.sumHoursContributedByOrganizationId(orgId);
+    Integer totalBeneficiaries = impactReportRepository.sumBeneficiariesServedByOrganizationId(orgId);
+    long totalReports = impactReportRepository.countByOrganizationId(orgId);
+    return ImpactSummaryDto.builder()
+            .totalHoursContributed(totalHours)
+            .totalBeneficiariesServed(totalBeneficiaries)
+            .averageRating(0.0)
+            .totalReports(totalReports)
+            .build();
+    }
 
     @Transactional
 public List<ImpactReportResponseDto> getReportsByVolunteer(

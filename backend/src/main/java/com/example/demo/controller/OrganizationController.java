@@ -13,6 +13,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -24,6 +25,7 @@ public class OrganizationController {
 
 
     @PostMapping
+    @PreAuthorize("hasAnyRole('PLATFORM_ADMIN', 'ORGANIZATION_COORDINATOR')")
     public ResponseEntity<OrganizationResponseDto> createOrganization(
 
         @Valid
@@ -40,6 +42,7 @@ public class OrganizationController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('PLATFORM_ADMIN', 'ORGANIZATION_COORDINATOR')")
     public ResponseEntity<OrganizationResponseDto> updateOrganization(
 
         @PathVariable Long id,
@@ -56,6 +59,7 @@ public class OrganizationController {
     }
 
     @PatchMapping("/{id}/approve")
+    @PreAuthorize("hasRole('PLATFORM_ADMIN')")
     public ResponseEntity<OrganizationResponseDto> approveOrganization(
 
         @PathVariable Long id
@@ -69,6 +73,7 @@ public class OrganizationController {
     }
 
     @PatchMapping("/{id}/suspend")
+    @PreAuthorize("hasRole('PLATFORM_ADMIN')")
     public ResponseEntity<OrganizationResponseDto> suspendOrganization(
 
         @PathVariable Long id
@@ -82,6 +87,7 @@ public class OrganizationController {
     }
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('PLATFORM_ADMIN', 'ORGANIZATION_COORDINATOR', 'VOLUNTEER')")
     public ResponseEntity<Page<OrganizationResponseDto>> getAllOrganizations(
 
         @ParameterObject Pageable pageable
@@ -95,6 +101,7 @@ public class OrganizationController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('PLATFORM_ADMIN', 'ORGANIZATION_COORDINATOR', 'VOLUNTEER')")
     public ResponseEntity<OrganizationResponseDto> getOrganizationById(
 
         @PathVariable Long id
@@ -108,6 +115,7 @@ public class OrganizationController {
     }
 
     @GetMapping("/coordinator/{coordinatorId}")
+    @PreAuthorize("hasAnyRole('PLATFORM_ADMIN', 'ORGANIZATION_COORDINATOR')")
 public ResponseEntity<List<OrganizationResponseDto>> getOrganizationsByCoordinator(
 
         @PathVariable Long coordinatorId
@@ -121,6 +129,7 @@ public ResponseEntity<List<OrganizationResponseDto>> getOrganizationsByCoordinat
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('PLATFORM_ADMIN')")
 public ResponseEntity<Void> deleteOrganization(
 
         @PathVariable Long id
