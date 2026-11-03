@@ -4,6 +4,7 @@ import useFetch from '../../hooks/useFetch';
 import {
   fetchOpportunities,
   publishOpportunity,
+  deleteOpportunity,
   setSearchQuery,
 } from '../../store/slices/opportunitySlice';
 import { enrollInOpportunity } from '../../store/slices/enrollmentSlice';
@@ -58,6 +59,18 @@ const OpportunityList = () => {
 
   const handlePublish = (id) => {
     dispatch(publishOpportunity(id));
+  };
+
+  const handleDelete = async (opp) => {
+    if (!window.confirm(`Delete ${opp.title}? This also removes its enrollments and reports.`)) {
+      return;
+    }
+    try {
+      await dispatch(deleteOpportunity(opp.id)).unwrap();
+      dispatch(notify('Opportunity deleted.', 'success'));
+    } catch (err) {
+      dispatch(notify(err.message || 'Failed to delete opportunity.', 'error'));
+    }
   };
 
   const filteredItems = items.filter((opp) => {
@@ -146,6 +159,16 @@ const OpportunityList = () => {
                       Publish
                     </button>
                   )}
+
+                {user?.role === 'PLATFORM_ADMIN' && (
+                  <button
+                    type="button"
+                    className="secondary-btn full-width"
+                    onClick={() => handleDelete(opp)}
+                  >
+                    Delete
+                  </button>
+                )}
               </div>
             </div>
           ))}

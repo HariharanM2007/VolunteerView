@@ -30,9 +30,22 @@ const Login = () => {
 
   return (
     <div className="auth-container">
+      <aside className="auth-story-panel">
+        <div className="auth-story-copy">
+          <p className="auth-eyebrow">Community starts with you</p>
+          <h2>Small acts.<br />Lasting impact.</h2>
+          <blockquote>
+            “We make a living by what we get, but we make a life by what we give.”
+            <cite>Winston Churchill</cite>
+          </blockquote>
+          <div className="auth-story-stats">
+            <span><strong>1,240+</strong> volunteers</span>
+            <span><strong>86</strong> local causes</span>
+          </div>
+        </div>
+      </aside>
       <div className="auth-card">
         <div className="auth-header">
-          <div className="logo">🌱</div>
           <h1>VolunteerView</h1>
           <p>Empowering communities through action</p>
         </div>

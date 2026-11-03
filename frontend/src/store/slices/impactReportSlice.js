@@ -73,6 +73,10 @@ const impactReportSlice = createSlice({
       // submitImpactReport
       .addCase(submitImpactReport.fulfilled, (state, action) => {
         state.items.unshift(action.payload);
+        state.error = null;
+      })
+      .addCase(submitImpactReport.rejected, (state, action) => {
+        state.error = action.payload;
       });
   },
 });

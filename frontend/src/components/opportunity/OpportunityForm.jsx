@@ -1,10 +1,19 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { createOpportunity } from '../../store/slices/opportunitySlice';
+import { fetchOrganizations } from '../../store/slices/organizationSlice';
+import { notify } from '../../store/slices/notificationSlice';
 
 const OpportunityForm = ({ onClose }) => {
   const dispatch = useDispatch();
   const user = useSelector((state) => state.auth?.user);
+  const organizations = useSelector((state) => state.organizations?.items || []);
+
+  useEffect(() => {
+    if (user?.role === 'PLATFORM_ADMIN') {
+      dispatch(fetchOrganizations({ page: 0, size: 100 }));
+    }
+  }, [dispatch, user?.role]);
 
   const [formData, setFormData] = useState({
     title: '',
@@ -33,10 +42,19 @@ const OpportunityForm = ({ onClose }) => {
       maxCapacity: formData.maxCapacity ? parseInt(formData.maxCapacity, 10) : 1,
       organizationId: formData.organizationId
         ? parseInt(formData.organizationId, 10)
-        : user?.organizationId || 1,
+        : user?.organizationId || null,
     };
-    await dispatch(createOpportunity(payload));
-    if (onClose) onClose();
+    if (!payload.organizationId) {
+      dispatch(notify('Select or assign an organization before creating an opportunity.', 'error'));
+      return;
+    }
+    try {
+      await dispatch(createOpportunity(payload)).unwrap();
+      dispatch(notify('Opportunity created successfully.', 'success'));
+      if (onClose) onClose();
+    } catch (err) {
+      dispatch(notify(err.message || 'Failed to create opportunity.', 'error'));
+    }
   };
 
   return (
@@ -60,6 +78,26 @@ const OpportunityForm = ({ onClose }) => {
               required
             />
           </div>
+
+          {user?.role === 'PLATFORM_ADMIN' && (
+            <div className="form-group">
+              <label htmlFor="opp-organization">Organization</label>
+              <select
+                id="opp-organization"
+                name="organizationId"
+                value={formData.organizationId}
+                onChange={handleChange}
+                required
+              >
+                <option value="">Select an organization</option>
+                {organizations.map((organization) => (
+                  <option key={organization.id} value={organization.id}>
+                    {organization.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
 
           <div className="form-group">
             <label htmlFor="opp-desc">Description</label>

@@ -7,11 +7,20 @@ import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.data.jpa.repository.Modifying;
 
 import java.util.List;
 
 public interface ImpactReportRepository
         extends JpaRepository<ImpactReport, Long> {
+
+        @Modifying
+        @Query("delete from ImpactReport ir where ir.enrollment.opportunity.id = :opportunityId")
+        void deleteByOpportunityId(@Param("opportunityId") Long opportunityId);
+
+        @Modifying
+        @Query("delete from ImpactReport ir where ir.volunteer.id = :volunteerId")
+        void deleteByVolunteerId(@Param("volunteerId") Long volunteerId);
 
     boolean existsByEnrollmentId(Long enrollmentId);
 

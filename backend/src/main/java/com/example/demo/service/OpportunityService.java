@@ -12,6 +12,8 @@ import com.example.demo.exception.BusinessValidationException;
 import com.example.demo.exception.ResourceNotFoundException;
 import com.example.demo.repository.OpportunityRepository;
 import com.example.demo.repository.OrganizationRepository;
+import com.example.demo.repository.ImpactReportRepository;
+import com.example.demo.repository.VolunteerEnrollmentRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -30,36 +32,29 @@ public class OpportunityService {
 
     private final OrganizationRepository organizationRepository;
 
+    private final ImpactReportRepository impactReportRepository;
+
+    private final VolunteerEnrollmentRepository enrollmentRepository;
+
     @Transactional
     public OpportunityResponseDto createOpportunity(
         OpportunityRequestDto dto,
         SystemUser actor
     ) {
 
-    if (actor.getRole() == Role.ORGANIZATION_COORDINATOR) {
-
-        if (actor.getOrganization() == null) {
-
-            throw new BusinessValidationException(
-                    "You must be assigned to an organization before creating opportunities."
-            );
-
-        }
-
-        if (!actor.getOrganization().getId().equals(dto.getOrganizationId())) {
-
-            throw new BusinessValidationException(
-                    "Access Denied: You can only create opportunities for your assigned organization."
-            );
-
-        }
-
-    }
-
     Organization organization = organizationRepository.findById(dto.getOrganizationId())
             .orElseThrow(() ->
                     new ResourceNotFoundException("Organization not found.")
             );
+
+        if (actor.getRole() == Role.ORGANIZATION_COORDINATOR
+            && (organization.getCoordinator() == null
+            || !organization.getCoordinator().getId().equals(actor.getId()))) {
+
+        throw new BusinessValidationException(
+            "Access Denied: You can only create opportunities for your assigned organization."
+        );
+        }
 
     Opportunity opportunity = Opportunity.builder()
             .title(dto.getTitle())
@@ -181,6 +176,8 @@ public class OpportunityService {
 
     Opportunity opportunity = findAndVerifyActor(id, actor);
 
+    impactReportRepository.deleteByOpportunityId(id);
+    enrollmentRepository.deleteByOpportunityId(id);
     opportunityRepository.delete(opportunity);
 
     }
@@ -262,16 +259,8 @@ public class OpportunityService {
 
     if (actor.getRole() == Role.ORGANIZATION_COORDINATOR) {
 
-        if (actor.getOrganization() == null) {
-
-            throw new BusinessValidationException(
-                    "You are not assigned to any organization."
-            );
-
-        }
-
-        if (!actor.getOrganization().getId().equals(
-                opportunity.getOrganization().getId())) {
+        if (opportunity.getOrganization().getCoordinator() == null
+            || !opportunity.getOrganization().getCoordinator().getId().equals(actor.getId())) {
 
             throw new BusinessValidationException(
                     "Access Denied: You can only manage opportunities for your assigned organization."

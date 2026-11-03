@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { createOrganization } from '../../store/slices/organizationSlice';
+import { notify } from '../../store/slices/notificationSlice';
 
 const OrganizationForm = ({ onClose }) => {
   const dispatch = useDispatch();
   const user = useSelector((state) => state.auth?.user);
+  const currentUserId = user?.userId ?? user?.id;
 
   const [formData, setFormData] = useState({
     name: '',
@@ -13,7 +15,7 @@ const OrganizationForm = ({ onClose }) => {
     contactEmail: '',
     contactPhone: '',
     foundedYear: '',
-    coordinatorId: user?.id || '',
+    coordinatorId: currentUserId || '',
   });
 
   const handleChange = (e) => {
@@ -28,10 +30,21 @@ const OrganizationForm = ({ onClose }) => {
     const payload = {
       ...formData,
       foundedYear: formData.foundedYear ? parseInt(formData.foundedYear, 10) : null,
-      coordinatorId: formData.coordinatorId ? parseInt(formData.coordinatorId, 10) : user?.id,
+      coordinatorId: formData.coordinatorId
+        ? parseInt(formData.coordinatorId, 10)
+        : currentUserId,
     };
-    await dispatch(createOrganization(payload));
-    if (onClose) onClose();
+    if (!payload.coordinatorId) {
+      dispatch(notify('Your account ID is unavailable. Please sign in again.', 'error'));
+      return;
+    }
+    try {
+      await dispatch(createOrganization(payload)).unwrap();
+      dispatch(notify('Organization created successfully.', 'success'));
+      if (onClose) onClose();
+    } catch (err) {
+      dispatch(notify(err.message || 'Failed to create organization.', 'error'));
+    }
   };
 
   return (

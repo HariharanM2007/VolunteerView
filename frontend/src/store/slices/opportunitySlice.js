@@ -37,6 +37,18 @@ export const publishOpportunity = createAsyncThunk(
   }
 );
 
+export const deleteOpportunity = createAsyncThunk(
+  'opportunities/deleteOpportunity',
+  async (id, { rejectWithValue }) => {
+    try {
+      await opportunityService.delete(id);
+      return id;
+    } catch (err) {
+      return rejectWithValue(err.response?.data || { message: err.message });
+    }
+  }
+);
+
 const initialState = {
   items: [],
   selectedItem: null,
@@ -80,6 +92,9 @@ const opportunitySlice = createSlice({
         if (index !== -1) {
           state.items[index] = action.payload;
         }
+      })
+      .addCase(deleteOpportunity.fulfilled, (state, action) => {
+        state.items = state.items.filter((opp) => opp.id !== action.payload);
       });
   },
 });

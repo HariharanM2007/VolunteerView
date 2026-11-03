@@ -17,6 +17,9 @@ const opportunityService = {
     const response = await api.patch(`/opportunities/${id}/publish`);
     return response.data;
   },
+  delete: async (id) => {
+    await api.delete(`/opportunities/${id}`);
+  },
 };
 
 export default opportunityService;

@@ -22,7 +22,7 @@ const AppContent = () => {
   const user = useSelector((state) => state.auth?.user);
 
   return (
-    <div className="app-container">
+    <div className={`app-container ${user ? 'user-app' : 'auth-app'}`}>
       {user && <Navbar />}
       <NotificationStack />
 

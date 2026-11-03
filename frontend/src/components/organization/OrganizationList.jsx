@@ -3,7 +3,9 @@ import { useDispatch, useSelector } from 'react-redux';
 import {
   fetchOrganizations,
   approveOrganization,
+  deleteOrganization,
 } from '../../store/slices/organizationSlice';
+import { notify } from '../../store/slices/notificationSlice';
 import OrganizationForm from './OrganizationForm';
 import EmptyState from '../common/EmptyState';
 
@@ -17,8 +19,25 @@ const OrganizationList = () => {
     dispatch(fetchOrganizations({ page: 0, size: 10 }));
   }, [dispatch]);
 
-  const handleApprove = (id) => {
-    dispatch(approveOrganization(id));
+  const handleApprove = async (id) => {
+    try {
+      await dispatch(approveOrganization(id)).unwrap();
+      dispatch(notify('Organization approved.', 'success'));
+    } catch (err) {
+      dispatch(notify(err.message || 'Failed to approve organization.', 'error'));
+    }
+  };
+
+  const handleDelete = async (org) => {
+    if (!window.confirm(`Delete ${org.name}? This also removes its opportunities and enrollments.`)) {
+      return;
+    }
+    try {
+      await dispatch(deleteOrganization(org.id)).unwrap();
+      dispatch(notify('Organization deleted.', 'success'));
+    } catch (err) {
+      dispatch(notify(err.message || 'Failed to delete organization.', 'error'));
+    }
   };
 
   const canAdd =
@@ -87,6 +106,15 @@ const OrganizationList = () => {
                         onClick={() => handleApprove(org.id)}
                       >
                         Approve
+                      </button>
+                    )}
+                    {user?.role === 'PLATFORM_ADMIN' && (
+                      <button
+                        type="button"
+                        className="action-btn delete-btn"
+                        onClick={() => handleDelete(org)}
+                      >
+                        Delete
                       </button>
                     )}
                   </td>

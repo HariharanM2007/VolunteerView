@@ -54,6 +54,12 @@ public class AuthService {
 
     }
 
+    if (role == Role.PLATFORM_ADMIN) {
+        throw new BusinessValidationException(
+                "Public registration does not allow the PLATFORM_ADMIN role."
+        );
+    }
+
     SystemUser user = SystemUser.builder()
             .username(dto.getUsername())
             .email(dto.getEmail())

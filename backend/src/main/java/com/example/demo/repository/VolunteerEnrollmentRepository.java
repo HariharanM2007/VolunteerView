@@ -8,12 +8,21 @@ import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.data.jpa.repository.Modifying;
 
 import java.util.List;
 import java.util.Optional;
 
 public interface VolunteerEnrollmentRepository
         extends JpaRepository<VolunteerEnrollment, Long> {
+
+        @Modifying
+        @Query("delete from VolunteerEnrollment ve where ve.opportunity.id = :opportunityId")
+        void deleteByOpportunityId(@Param("opportunityId") Long opportunityId);
+
+        @Modifying
+        @Query("delete from VolunteerEnrollment ve where ve.volunteer.id = :volunteerId")
+        void deleteByVolunteerId(@Param("volunteerId") Long volunteerId);
 
     boolean existsByVolunteerIdAndOpportunityId(
             Long volunteerId,
@@ -95,6 +104,11 @@ public interface VolunteerEnrollmentRepository
             FROM VolunteerEnrollment ve
             WHERE ve.opportunity.organization.id = :orgId
             """)
+    @EntityGraph(attributePaths = {
+            "volunteer",
+            "opportunity",
+            "opportunity.organization"
+    })
     Page<VolunteerEnrollment> findByOrganizationId(
             @Param("orgId") Long orgId,
             Pageable pageable

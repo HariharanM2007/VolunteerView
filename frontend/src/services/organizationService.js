@@ -17,6 +17,9 @@ const organizationService = {
     const response = await api.patch(`/organizations/${id}/approve`);
     return response.data;
   },
+  delete: async (id) => {
+    await api.delete(`/organizations/${id}`);
+  },
 };
 
 export default organizationService;

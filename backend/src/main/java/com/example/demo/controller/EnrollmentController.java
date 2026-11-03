@@ -108,6 +108,7 @@ public class EnrollmentController {
     }
 
     @GetMapping("/volunteer/{volunteerId}")
+    @PreAuthorize("hasRole('PLATFORM_ADMIN')")
     public ResponseEntity<Page<EnrollmentResponseDto>> getVolunteerEnrollments(
             @PathVariable Long volunteerId,
             Pageable pageable

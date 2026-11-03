@@ -66,7 +66,7 @@ public class ImpactReportController {
     }
 
     @GetMapping("/volunteer/{volunteerId}/summary")
-    @PreAuthorize("hasAnyRole('PLATFORM_ADMIN', 'VOLUNTEER')")
+    @PreAuthorize("hasRole('PLATFORM_ADMIN')")
     public ResponseEntity<ImpactSummaryDto> getVolunteerSummary(@PathVariable Long volunteerId) {
         return ResponseEntity.ok(impactReportService.getImpactSummary(volunteerId));
     }
@@ -78,6 +78,7 @@ public class ImpactReportController {
     }
 
     @GetMapping("/volunteer/{volunteerId}")
+    @PreAuthorize("hasRole('PLATFORM_ADMIN')")
     public ResponseEntity<List<ImpactReportResponseDto>> getReportsByVolunteer(
             @PathVariable Long volunteerId
     ) {

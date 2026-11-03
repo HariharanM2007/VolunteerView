@@ -1,6 +1,10 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { submitImpactReport } from '../../store/slices/impactReportSlice';
+import {
+  fetchImpactReports,
+  submitImpactReport,
+} from '../../store/slices/impactReportSlice';
+import { notify } from '../../store/slices/notificationSlice';
 
 const ImpactReportForm = ({ onClose }) => {
   const dispatch = useDispatch();
@@ -20,6 +24,15 @@ const ImpactReportForm = ({ onClose }) => {
     rating: 5,
   });
 
+  useEffect(() => {
+    if (!formData.enrollmentId && completedEnrollments.length > 0) {
+      setFormData((prev) => ({
+        ...prev,
+        enrollmentId: completedEnrollments[0].id,
+      }));
+    }
+  }, [completedEnrollments, formData.enrollmentId]);
+
   const handleChange = (e) => {
     setFormData((prev) => ({
       ...prev,
@@ -36,8 +49,14 @@ const ImpactReportForm = ({ onClose }) => {
       beneficiariesServed: parseInt(formData.beneficiariesServed, 10),
       rating: parseInt(formData.rating, 10),
     };
-    await dispatch(submitImpactReport(payload));
-    if (onClose) onClose();
+    try {
+      await dispatch(submitImpactReport(payload)).unwrap();
+      await dispatch(fetchImpactReports({ page: 0, size: 10 })).unwrap();
+      dispatch(notify('Impact report submitted successfully.', 'success'));
+      if (onClose) onClose();
+    } catch (err) {
+      dispatch(notify(err.message || 'Failed to submit impact report.', 'error'));
+    }
   };
 
   return (

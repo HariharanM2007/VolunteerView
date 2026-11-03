@@ -24,6 +24,8 @@ public interface SystemUserRepository extends JpaRepository<SystemUser, Long> {
 
     List<SystemUser> findByIsActiveTrue();
 
+    List<SystemUser> findByOrganizationId(Long organizationId);
+
     long countByRole(Role role);
 
 }

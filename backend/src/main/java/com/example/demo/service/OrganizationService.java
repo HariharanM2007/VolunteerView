@@ -14,6 +14,8 @@ import com.example.demo.exception.ResourceNotFoundException;
 import com.example.demo.repository.OpportunityRepository;
 import com.example.demo.repository.OrganizationRepository;
 import com.example.demo.repository.SystemUserRepository;
+import com.example.demo.repository.ImpactReportRepository;
+import com.example.demo.repository.VolunteerEnrollmentRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -32,10 +34,26 @@ public class OrganizationService {
 
     private final OpportunityRepository opportunityRepository;
 
-    @Transactional
-    public OrganizationResponseDto createOrganization(OrganizationRequestDto dto) {
+        private final ImpactReportRepository impactReportRepository;
 
-    SystemUser coordinator = systemUserRepository.findById(dto.getCoordinatorId())
+        private final VolunteerEnrollmentRepository enrollmentRepository;
+
+    @Transactional
+        public OrganizationResponseDto createOrganization(
+                        OrganizationRequestDto dto,
+                        SystemUser actor
+        ) {
+
+        Long coordinatorId = dto.getCoordinatorId();
+        if (actor.getRole() == Role.ORGANIZATION_COORDINATOR) {
+                coordinatorId = actor.getId();
+        }
+
+        if (coordinatorId == null) {
+                throw new BusinessValidationException("Coordinator ID is required.");
+        }
+
+        SystemUser coordinator = systemUserRepository.findById(coordinatorId)
             .orElseThrow(() ->
                     new ResourceNotFoundException("Coordinator not found.")
             );
@@ -83,7 +101,8 @@ public class OrganizationService {
     @Transactional
     public OrganizationResponseDto updateOrganization(
         Long id,
-        OrganizationRequestDto dto
+                OrganizationRequestDto dto,
+                SystemUser actor
 ) {
 
     Organization organization = organizationRepository.findById(id)
@@ -91,21 +110,27 @@ public class OrganizationService {
                     new ResourceNotFoundException("Organization not found.")
             );
 
-    organization.setName(dto.getName());
+    if (actor.getRole() == Role.ORGANIZATION_COORDINATOR
+            && (organization.getCoordinator() == null
+            || !organization.getCoordinator().getId().equals(actor.getId()))) {
+        throw new BusinessValidationException(
+                "Access Denied: You can only update your assigned organization."
+        );
+    }
+
+        if (!organization.getName().equals(dto.getName())
+                        && organizationRepository.existsByName(dto.getName())) {
+                throw new BusinessValidationException(
+                                "Organization name already exists."
+                );
+        }
+
+        organization.setName(dto.getName());
     organization.setMission(dto.getMission());
     organization.setAddress(dto.getAddress());
     organization.setContactEmail(dto.getContactEmail());
     organization.setContactPhone(dto.getContactPhone());
     organization.setFoundedYear(dto.getFoundedYear());
-
-    if (!organization.getName().equals(dto.getName())
-        && organizationRepository.existsByName(dto.getName())) {
-
-    throw new BusinessValidationException(
-            "Organization name already exists."
-    );
-
-        }
 
     organizationRepository.save(organization);
 
@@ -230,21 +255,15 @@ for (Opportunity opportunity : opportunities) {
                     new ResourceNotFoundException("Organization not found.")
             );
 
-    long opportunityCount =
-            opportunityRepository.countByOrganizationId(id);
-
-    if (opportunityCount > 0) {
-
-        throw new BusinessValidationException(
-                "Cannot delete organization "
-                        + organization.getName()
-                        + " because it has "
-                        + opportunityCount
-                        + " associated opportunities. Remove all opportunities first."
-        );
-
+        for (Opportunity opportunity : opportunityRepository.findByOrganizationId(id)) {
+                impactReportRepository.deleteByOpportunityId(opportunity.getId());
+                enrollmentRepository.deleteByOpportunityId(opportunity.getId());
+                opportunityRepository.delete(opportunity);
     }
 
+        List<SystemUser> assignedUsers = systemUserRepository.findByOrganizationId(id);
+        assignedUsers.forEach(user -> user.setOrganization(null));
+        systemUserRepository.saveAll(assignedUsers);
     organizationRepository.delete(organization);
 
     }

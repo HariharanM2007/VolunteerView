@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { register } from '../store/slices/authSlice';
 
+const PUBLIC_REGISTRATION_ROLES = ['VOLUNTEER', 'ORGANIZATION_COORDINATOR'];
+
 const Register = () => {
   const dispatch = useDispatch();
   const { loading } = useSelector((state) => state.auth || {});
@@ -45,9 +47,22 @@ const Register = () => {
 
   return (
     <div className="auth-container">
+      <aside className="auth-story-panel">
+        <div className="auth-story-copy">
+          <p className="auth-eyebrow">Community starts with you</p>
+          <h2>Small acts.<br />Lasting impact.</h2>
+          <blockquote>
+            “We make a living by what we get, but we make a life by what we give.”
+            <cite>Winston Churchill</cite>
+          </blockquote>
+          <div className="auth-story-stats">
+            <span><strong>1,240+</strong> volunteers</span>
+            <span><strong>86</strong> local causes</span>
+          </div>
+        </div>
+      </aside>
       <div className="auth-card">
         <div className="auth-header">
-          <div className="logo">🌱</div>
           <h1>VolunteerView</h1>
           <p>Empowering communities through action</p>
         </div>
@@ -143,11 +158,9 @@ const Register = () => {
               value={formData.role}
               onChange={handleChange}
             >
-              <option value="VOLUNTEER">VOLUNTEER</option>
-              <option value="ORGANIZATION_COORDINATOR">
-                ORGANIZATION_COORDINATOR
-              </option>
-              <option value="PLATFORM_ADMIN">PLATFORM_ADMIN</option>
+              {PUBLIC_REGISTRATION_ROLES.map((role) => (
+                <option key={role} value={role}>{role}</option>
+              ))}
             </select>
           </div>
 

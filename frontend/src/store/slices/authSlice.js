@@ -19,7 +19,7 @@ export const register = createAsyncThunk(
   async (userData, { rejectWithValue }) => {
     try {
       const data = await authService.register(userData);
-      localStorage.setItem('user', JSON.stringify(data));
+      localStorage.removeItem('user');
       return data;
     } catch (err) {
       return rejectWithValue(err.response?.data || { message: err.message });
@@ -69,7 +69,8 @@ const authSlice = createSlice({
       })
       .addCase(register.fulfilled, (state, action) => {
         state.loading = false;
-        state.user = action.payload;
+        // Registration creates a pending account; login is only possible after approval.
+        state.user = null;
         state.error = null;
       })
       .addCase(register.rejected, (state, action) => {

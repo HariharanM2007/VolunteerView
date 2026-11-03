@@ -1,0 +1,446 @@
+VolunteerView - Backend
+VolunteerView - Non-Profit Volunteer Engagement Platform (SRS)
+Table of Contents:
+Project Overview
+Technology Stack
+Project Structure
+Dependencies and Configuration
+Database Configuration
+Entity Models
+Repositories
+Service Layer
+Controller Layer
+Security Implementation
+Exception Handling
+Data Transfer Objects (DTOS)
+API Endpoints
+Frontend Component Specifications
+Frontend Service Configurations (Axios API)
+Frontend Store Configurations (Redux Toolkit)
+Backend Test Cases
+Frontend Test Cases
+Demo User Interface
+End of Documentation
+ 
+Project Overview
+The system orchestrates a non-profit volunteer engagement and management platform, natively facilitating administrator-managed user approval and organization oversight with transactional status lifecycle enforcement, coordinator-driven opportunity creation and enrollment management with capacity validation, volunteer-led enrollment with automated status progression, and platform-wide impact analytics. It provides structural entry points for registering non-profit organizations with PENDING APPROVED status gating, creating volunteer opportunities with DRAFT - OPEN CLOSED COMPLETED lifecycle enforcement, enrolling volunteers with capacity-check and duplicate-prevention guards, progressing enrollments through PENDING - APPROVED states, and submitting impact reports tied to COMPLETED enrollments with hours-contribution validation. -STARTED COMPLETED
+The system enforces role-based access control dynamically allocating distinct application privileges for PLATFORM_ADMIN, ORGANIZATION_COORDINATOR, and VOLUNTEER roles inherently. All interactions strictly utilize a stateless filter topology that executes the standard HS256 JWT algorithm implicitly signing JSON Web Tokens with dual-token (access + refresh) pair issuance to prevent unauthorized session modifications and natively restricting data access by role and organizational affiliation internally safely.
+ 
+Technology Stack
+Framework: Spring Boot 3.2.5
+Java Version: Java 17+
+Build Tool: Maven
+Frontend: React 18
+Database: MySQL
+ORM Spring Data JPA
+Security: Spring Security
+Password Encoding: BCrypt
+JWT Library: JJWT (io jsonwebtoken) 0.12.5
+Lombok Yes (1 18 46)
+Validation Spring Boot Starter Validation
+ 
+Dependencies and Configuration
+Spring Boot Starter Web
+Spring Boot Starter Data JPA
+Spring Boot Starter Security
+Spring Boot Starter Validation
+MySQL Connector/J
+JWT Library (jjwt-api, jjwt-impl, jjwt-jackson) v0.12.5
+Lombok v1.18.46
+React Router DOM
+Redux Toolkit
+React Redux
+Axios
+React Testing Library
+TestNG v7.8.0
+ 
+Database Configuration
+URL
+jdbc:mysql://localhost:3306/volunteer_view_db?createDatabaselfNotExist=true&useS
+SL = 1 false&server Timezone=UTC
+Username root
+Password: password (configured in application properties)
+Driver com mysql cj jdbc Driver
+JPA DDL Auto update
+Show SQL true
+Format SQL true
+Dialect org hibernate dialect MySQL Dialect
+JWT secret property key jwt secret (value
+VmxoRjNIVjBsTnRIZX.JWaWW3U2VjcmV0S2V5Rm9ySldUQXV0aGVudGljYXRpb24y MDI1)
+JWT access-token-expiration property key jwt.access-token-expiration (value
+JWT refresh-token-expiration property key jwt.refresh-token-expiration (value 604800000)
+Server port 8080
+ 
+Entity Models
+SystemUser (Table: system_users)
+Fields: id (Long), username (String), email (String), passwordHash (String), fullName (String), phoneNumber (String), role (Role enum), status (UserStatus enum), organization (Organization @Many ToOne), isActive (Boolean), createdAt (LocalDateTime), updatedAt (LocalDateTime)
+Validation: username @Column(name="username", unique true, nullable=false, length=50).
+email @Colum (name="email", unique true, nullable false, length I = 100 ) , passwordHash @Column(name="password_hash", nullable=false), fullName @Column(name="full_name", nullable false, length=100), phoneNumber @Column(name="phone_number", length=20), role @Enumerated(EnumType.STRING) @Column(name="role", nullable=false, length=30), status @Enumerated(Enum Type STRING) @Column(name="status", nullable=false, length=30) @Builder Default PENDING, organization @Many ToOne(fetch=LAZY) @JoinColumn(name="organization_id"), isActive @Column(name="is_active", nullable false) @Builder Default=true, createdAt @Column(name="created_at", nullable false, updatable=false), updatedAt @Column(name="updated_at").
+Role enum values: PLATFORM_ADMIN, ORGANIZATION_COORDINATOR, VOLUNTEER.
+UserStatus enum values: PENDING, APPROVED, REJECTED, DEACTIVATED.
+Annotations: @Entity, @Table(name="system_users"), @Getter, @Setter, @NoArgsConstructor, @AllArgsConstructor, @Builder
+Lifecycle: @PrePersist sets both createdAt and updatedAt to LocalDateTime.now().
+@PreUpdate refreshes updatedAt to LocalDateTime.now()
+ 
+Organization (Table: organizations)
+Fields: id (Long), name (String), mission (String), address (String), contactEmail (String), contactPhone (String), foundedYear (Integer), status (Organization Status enum), coordinator (SystemUser @ManyToOne), opportunities (List<Opportunity> @OneToMany), createdAt (LocalDate Time), updatedAt (LocalDateTime)
+Validation: name @Column(unique true, nullable=false, length=150), mission @Column(nullable=false, columnDefinition="TEXT"), address @Column(nullable=false, length=255), contactEmail @Column(nullable=false, length=100), contactPhone @Column(length=20), foundedYear @Column, status @Enumerated (EnumType.STRING) @Column(nullable=false, length=20) @Builder Default PENDING, coordinator @Many ToOne(fetch=LAZY) @JoinColumn(name="coordinator_id", nullable=false), opportunities @OneToMany(mappedBy="organization", cascade=ALL, orphanRemoval=true) @Builder Default=new ArrayList<>()
+Organization Status enum values: PENDING, APPROVED, SUSPENDED.
+Annotations @Entity, @Table(name="organizations"), @Getter, @Setter, @NoArgsConstructor, @AllArgsConstructor @Builder.
+ 
+Opportunity (Table: opportunities)
+Fields: id (Long), title (String), description (String), location (String), category (String), scheduledDate (LocalDate), startTime (LocalTime), endTime (LocalTime), maxCapacity (Integer), enrolledCount (Integer), requiredSkills (String), status (Opportunity Status enum), organization (Organization @ManyToOne), enrollments (List<VolunteerEnrollment> @OneToMany), createdAt (LocalDate Time), updatedAt (LocalDateTime)
+Validation: title @Column(nullable=false, length=200), description @Column(nullable=false, columnDefinition="TEXT"), location @Column(nullable=false, length=255), category @Column(length=50), scheduledDate @Column(nullable=false), startTime @Column(nullable=false), endTime @Column(nullable=false), maxCapacity @Column(nullable=false), enrolled Count @Column(nullable=false) @Builder. Default=0, requiredSkills @Column(length=500), status @Enumerated (EnumType STRING) @Column(nullable=false, length=20) @Builder Default DRAFT, organization @Many ToOne(fetch=LAZY) @JoinColumn(name="organization_id", nullable=false), enrollments @OneToMany(mappedBy="opportunity", cascade=ALL, orphan Removal=true) @Builder Default=new ArrayList<>().
+OpportunityStatus enum values DRAFT, OPEN, CLOSED, COMPLETED.
+Annotations @Entity. @Table(name="opportunities"), @Getter, @Setter, @NoArgsConstructor, @AllArgsConstructor, @Builder
+ 
+VolunteerEnrollment (Table: volunteer_enrollments)
+Fields: id (Long), volunteer (SystemUser @Many ToOne), opportunity (Opportunity @ManyToOne), status (Enrollment Status enum), enrolledAt (LocalDateTime), approvedAt (LocalDate Time), hoursLogged (Double), notes (String)
+Validation: volunteer @JoinColumn(name="volunteer_id", nullable=false), opportunity @JoinColumn(name="opportunity_id", nullable=false), status @Enumerated(Enum Type. STRING) @Column(name="enrollment_status", nullable=true, length=30), enrolledAt @Column(name="enrolled_at", nullable=false, updatable=false), approvedAt @Column(name="approved_at"), hoursLogged @Column(name="hours_logged"), notes @Column(length=500).
+Unique Constraint @UniqueConstraint(columnNames=("volunteer_id", "opportunity_id"}, name="uk_volunteer_opportunity") - prevents duplicate enrollments for the same volunteer and opportunity
+EnrollmentStatus enum values: PENDING, APPROVED, STARTED, COMPLETED.
+REJECTED CANCELLED
+Annotations @Entity @Table(name="volunteer_enrollments"). @Getter, @Setter @NoArgsConstructor. @AllArgsConstructor, @Builder
+Lifecycle @PrePersist sets enrolledAt to LocalDate Time now(), status defaults to PENDING if null, hours Logged defaults to 0.0 if null.
+ 
+ImpactReport (Table: impact_reports)
+Fields: id (Long), enrollment (VolunteerEnrollment @OneToOne), volunteer (SystemUser @ManyToOne), summary (String), hours Contributed (Double), beneficiaries Served (Integer), rating (Integer), submittedAt (LocalDateTime)
+Validation: enrollment @OneToOne(fetch=LAZY) @JoinColumn(name="enrollment_id", nullable-false, unique true), volunteer @Many ToOne(fetch=LAZY) @JoinColumn(name="volunteer_id", nullable=false), summary @Column(nullable=false, columnDefinition="TEXT"), hours Contributed @Column(nullable=false), beneficiaries Served @Column(nullable=false), rating @Column(nullable=false), submittedAt @Column(name="submitted_at", nullable false, updatable=false).
+Unique Constraint: @UniqueConstraint(columnNames={"enrollment_id"}, name="uk_enrollment_report") one report per enrollment strictly enforced.
+Annotations: @Entity, @Table(name="impact_reports"), @Getter, @Setter, @NoArgsConstructor, @AllArgsConstructor, @Builder.
+Lifecycle: @PrePersist sets submittedAt to LocalDateTime.now().
+ 
+Repositories
+All repositories are interfaces extending JpaRepository<Entity, Long>.
+SystemUserRepository
+Optional<SystemUser> findByUsername(String username)
+Optional SystemUser> findByEmail(String email)
+boolean existsByUsername(String username)
+boolean existsByEmail(String email)
+List<SystemUser> findByRole(SystemUser Role role)
+List<SystemUser> findByStatus(SystemUser UserStatus status)
+List<SystemUser> findByIsActive True()
+long countByRole(SystemUser Role role)
+ 
+OrganizationRepository
+boolean existsByName(String name)
+Optional<Organization> findByCoordinatorld(Long coordinatorld)
+List<Organization> findByStatus(Organization. OrganizationStatus status)
+Page<Organization> findAll(Pageable pageable)
+long countByStatus(Organization. OrganizationStatus status)
+@Query("SELECT o FROM Organization o WHERE o coordinator.id = coordinatorld") List<Organization> findAllByCoordinatorld(@Param("coordinatorld") Long coordinatorld)
+OpportunityRepository
+List<Opportunity> findByOrganizationld(Long organizationld)
+List<Opportunity> findByStatus(Opportunity OpportunityStatus status)
+Page<Opportunity> findAll(Pageable pageable)
+Page<Opportunity> findByOrganizationld(Long organizationld, Pageable pageable)
+long countByStatus (Opportunity Opportunity Status status)
+@Query("SELECT o FROM Opportunity o WHERE o.status = 'OPEN' AND o.enrolledCount < o maxCapacity") List<Opportunity> findAvailableOpportunities()
+@Query("SELECT o FROM Opportunity o WHERE o organization.id = orgld AND o status status") List<Opportunity> findByOrganizationldAndStatus(@Param("orgId") Long orgld. @Param("status")
+Opportunity. Opportunity Status status) @Query("SELECT COUNT(0) FROM Opportunity o WHERE o organization.id = orgld") long countByOrganizationld(@Param("orgld") Long orgld)
+ 
+VolunteerEnrollment Repository
+boolean existsByVolunteerldAndOpportunityId(Long volunteerld, Long opportunityld)
+@Query("SELECT ve FROM VolunteerEnrollment ve JOIN FETCH ve volunteer JOIN FETCH ve. opportunity JOIN FETCH ve.opportunity organization WHERE ve.id = :id") Optional<VolunteerEnrollment> findWithDetailsByld(@Param("id") Long id)
+List VolunteerEnrollment> findByVolunteerld(Long volunteerld)
+List VolunteerEnrollment> findByOpportunityId(Long opportunityld)
+@EntityGraph(attributePaths=("volunteer", "opportunity", "opportunity.organization")}) Page VolunteerEnrollment> findAll(Pageable pageable)
+@EntityGraph Page<VolunteerEnrollment> findByVolunteerld(Long volunteerld, Pageable pageable)
+List VolunteerEnrollment> findByStatus(VolunteerEnrollment Enrollment Status status)
+long countByStatus (VolunteerEnrollment Enrollment Status status)
+@Query findByOpportunityIdAndStatus(@Param("oppld") Long oppld. @Param("status") VolunteerEnrollment Enrollment Status status)
+@Query Optional<Double> sum Hours LoggedByVolunteerld(@Param("volunteerld") Long volunteerld)
+@Query long countByOrganizationld(@Param("orgld") Long orgld)
+@Query Page VolunteerEnrollment findByOrganizationld(@Param("orgld") Long orgid Pageable pageable)
+ 
+ImpactReportRepository
+boolean existsByEnrollmentid(Long enrollmentid)
+List<ImpactReport> findByVolunteerld(Long volunteerld)
+@EntityGraph(attributePaths={"enrollment", "volunteer", "enrollment.opportunity", "enro Ilment.opportunity.organization")) Page<ImpactReport> findAll(Pageable pageable)
+@EntityGraph Page<ImpactReport> findByVolunteerld(Long volunteerld, Pageable pageable)
+@Query List<ImpactReport> findByOrganizationld(@Param("orgId") Long orgld)
+@Query("SELECT COALESCE (SUM(ir.hours Contributed), 0) FROM ImpactReport ir WHERE ir.volunteer.id = volunteerld") Double sumHours ContributedByVolunteerld(@Param("volunteerld") Long volunteerld)
+@Query("SELECT COALESCE(SUM(ir.beneficiaries Served), 0)...") Integer sumBeneficiaries ServedByVolunteerld(@Param("volunteerld") Long volunteerld)
+@Que @Query("SELECT COALESCE(AVG(ir rating), 0)") Double avgRatingByVolunteerld(@Param("volunteerld") Long volunteerid)
+@Query("SELECT COALESCE(SUM(ir hours Contributed), 0) FROM ImpactReport ir WHERE ir enrollment opportunity organization.id = orgld") Double sumHours ContributedByOrganizationld(@Param("orgld") Long orgid)
+@Query Integer sumBeneficiaries Served By Organizationld(@Param("orgId") Long orgld)
+@Query("SELECT COUNT(ir) FROM ImpactReport ir WHERE ir enrollment opportunity organization id orgld") long countByOrganizationld(@Param("orgid") Long orgld)
+ 
+Service Layer
+Auth Service
+register(RegisterDto dto) - Validates username uniqueness via existsByUsername(); throws BusinessValidationException("Username" + dto getUsername()+" is already taken. Please choose a different username.") if duplicate. Validates email uniqueness via existsByEmail(); throws BusinessValidationException("Email"+dto.getEmail()+" is already registered.") if duplicate. Validates and parses role via
+SystemUser Role valueOf(dto getRole() toUpperCase()), throws
+BusinessValidationException("Invalid role dto getRole()+" Allowed roles.
+PLATFORM_ADMIN, ORGANIZATION_COORDINATOR, VOLUNTEER") on failure Builds
+SystemUser via builder with username, email,
+passwordHash=passwordEncoder encode(dto getPassword()), fullName, phoneNumber (null
+if blank), role, status-PENDING, IsActive=true Saves via userRepository save() Returns
+AuthResponseDto via builder with username fullName, role, status, userld Note:
+registration does NOT return tokens user must be approved by an admin before login
+login(AuthRequestDto dto) - Loads user via
+findByUsername(dto.getUsername()) or Else Throw(BusinessValidationException("Invalid credentials. No account found.")). Checks is Active, if false throws BusinessValidationException("Your account has been deactivated. Please contact a platform administrator."). Auto-approves PLATFORM_ADMIN users whose status is PENDING by setting status-APPROVED and saving. Checks status, if not APPROVED throws BusinessValidationException("Your account status is" + user.getStatus()+". You can only log in once an administrator approves your account."). Validates password via passwordEncoder.matches(dto.getPassword(), user.getPasswordHash()); throws Business ValidationException("Invalid credentials. Incorrect password.") on mismatch. Generates dual tokens via jwtService generateAccessToken(user) and jwtService.generate Refresh Token(user). Returns AuthResponse Dto with access Token, refresh Token, username, fullName, role, status, userld, organizationld, organizationName.
+refresh Token (Refresh Token RequestDto dto) - Validates refresh Token non-null/non-blank; throws BusinessValidationException("Refresh token is required"). Extracts username via jwtService extractUsername(); catches exception as BusinessValidationException("Invalid or expired refresh token"). Checks is TokenExpired(); throws BusinessValidationException("Refresh token has expired. Please log in again."). Loads user throws ResourceNotFoundException("User not found for refresh token"). Checks isActive, throws BusinessValidationException("Account is deactivated. Cannot refresh token."). Generates new access Token via jwtService. generateAccessToken(user). Returns AuthResponseDto with new access Token, original refresh Token, username, fullName, role, userld.
+ 
+Organization Service
+createOrganization(OrganizationRequestDto dto) - Validates coordinator exists via systemUserRepository.findById(dto.getCoordinatorld()). orElse Throw (ResourceNotFoundExc eption). Validates coordinator role is ORGANIZATION_COORDINATOR or PLATFORM_ADMIN; throws BusinessValidationException("User " + coordinator.getUsername()+" must have ORGANIZATION_COORDINATOR or PLATFORM_ADMIN role") otherwise. Checks name uniqueness via existsByName(); throws Business ValidationException("An organization with name " + dto.getName()+" already exists"). Builds Organization with status=PENDING. Saves and returns mapped OrganizationResponseDto.
+update Organization(Long id, OrganizationRequestDto dio) - Loads organization, throws
+ResourceNotFoundException Updates name, mission, address, contact Email,
+contactPhone foundedYear Saves and retums mapped dto
+approveOrganization(Long id)-Annotated @Transactional. Loads organization; validates status==PENDING; throws Business ValidationException("Organization" + organization.getName()+" cannot be approved. Current status: " + organization.getStatus() +". Only PENDING organizations can be approved.") otherwise. Sets status=APPROVED. Saves. Returns mapped dto.
+suspendOrganization(Long id) - Annotated @Transactional (rollbackFor Exception.class). Loads organization, validates status==APPROVED, throws BusinessValidationException("Organization" + organization.getName()+" cannot be suspended. Current status: " + organization.getStatus()+". Only APPROVED organizations can be suspended ") otherwise. Finds all OPEN opportunities via findByOrganizationldAndStatus(id, OPEN) and sets each to CLOSED. Sets organization status=SUSPENDED Saves and returns mapped dto.
+@Transactional(readOnly=true). Returns getAllOrganizations (Pageable pageable) organizationRepository findAll(pageable) map(this map ToResponse Dto).
+getOrganizationByld(Long id)@Transactional(readOnly=true). Loads organization; throws ResourceNotFoundException. Returns mapped dto.
+getOrganizationsByCoordinator (Long coordinatorld) - @Transactional (readOnly=true) Returns findAllByCoordinatorld(coordinatorld) mapped to dto list
+delete Organization(Long id) - Loads organization, throws ResourceNotFoundException Counts opportunities via countByOrganizationld(id), throws Business ValidationException("Cannot delete organization" + organization getName()+" because it has active Opportunities +" associated opportunities Remove all opportunities first") if count > 0 Deletes organization
+ 
+Opportunity Service
+createOpportunity(OpportunityRequestDto dto, SystemUser actor) -@Transactional(rollbackFor Exception.class). For ORGANIZATION_COORDINATOR actors: validates actor has an assigned organization; throws BusinessValidationException("You must be assigned to an organization before creating opportunities.") if null. Validates actor's orgid equals dto.getOrganizationld(); throws BusinessValidationException("Access Denied: You can only create opportunities for your assigned organization.") on mismatch. Loads organization; throws ResourceNotFoundException. Builds Opportunity with status=DRAFT, enrolledCount=0. Saves and returns mapped Opportunity ResponseDto.
+updateOpportunity(Long id, Opportunity RequestDto dto, SystemUser actor) -@Transactional (rollbackFor Exception.class). Calls findAndVerifyActor(id, actor) which enforces ORGANIZATION_COORDINATOR can only manage their own org's opportunities; throws BusinessValidationException("Access Denied: You can only manage opportunities for
+your assigned organization") Updates title, description category, scheduled Date, start Time. endTime, location, maxCapacity, requiredSkills Saves and retums mapped dto
+publish Opportunity(Long id. SystemUser actor)
+@Transactional (rollbackFor-Exception class) Calls findAndVentyActor Sets status-OPEN
+Saves and returns mapped dto
+closeOpportunity(Long id, SystemUser actor) -
+@Transactional(rollbackFor Exception.class). Calls findAndVerifyActor. Sets status-CLOSED. Saves and returns mapped dto.
+completeOpportunity(Long id, SystemUser actor)
+@Transactional(rollbackFor Exception.class). Calls findAndVerifyActor. Sets status-COMPLETED. Saves and returns mapped dto.
+delete Opportunity(Long id, SystemUser actor) -
+@Transactional (rollbackFor Exception class). Calls findAndVerifyActor Deletes opportunity
+getAllOpportunities (Pageable pageable) - @Transactional(readOnly=true) Returns opportunity Repository findAll(pageable) map(this map ToResponseDto)
+getOpportunityByld(Long id)@Transactional (readOnly=true) Loads opportunity, throws ResourceNotFoundException Returns mapped dto.
+getOpportunitiesByOrganization (Long orgld)@Transactional(readOnly=true). Returns findByOrganizationld(orgld) mapped to dto list
+ 
+Enrollment Service
+enrollVolunteer(Long volunteerld, EnrollmentRequestDto dto) -@Transactional(rollbackFor-Exception.class). Loads volunteer, throws ResourceNotFoundException. Validates volunteer.role VOLUNTEER; throws BusinessValidationException("Only users with VOLUNTEER role can enroll."). Validates volunteer.status==APPROVED, throws Business ValidationException("Your account must be APPROVED by an administrator before you can enroll."). Loads opportunity; throws ResourceNotFoundException. Validates opportunity.status==OPEN; throws BusinessValidationException("Cannot enroll in opportunity. Only OPEN opportunities accept enrollments."). Checks existsByVolunteerldAndOpportunityId(); throws Business ValidationException("You are already enrolled in this opportunity."). Checks enrolledCount >= maxCapacity; throws BusinessValidationException("Opportunity is at full capacity") Builds VolunteerEnrollment with status-PENDING. Saves enrollment. Increments opportunity.enrolledCount by 1 and saves opportunity. Returns mapped EnrollmentResponseDto.
+approve Enrollment (Long enrollmentid, SystemUser actor) -
+@Transactional(rollbackFor Exception class) Calls findAndVerifyActor which enforces ORGANIZATION_COORDINATOR org-scoping. Validates status==PENDING; throws Business ValidationException("Only PENDING enrollments can be approved."). Sets status=APPROVED, approvedAt LocalDateTime.now(). Saves and returns mapped dto.
+ 
+checkin(Long enrollmentid, SystemUser actor) -
+@Transactional(rollbackFor Exception.class). Loads enrollment, throws ResourceNotFoundException. For ORGANIZATION_COORDINATOR: validates actor's orgid matches enrollment's opportunity's organization; throws BusinessValidationException("Access Denied: You can only check in volunteers for your assigned organization."). Validates status==APPROVED, throws BusinessValidationException("Volunteer must be APPROVED before checking in."). Sets status=STARTED. Saves. Returns mapped dto via findWithDetails Byld.
+complete Enrollment (Long enrollmentid, Double hours, SystemUser actor) @Transactional(rollbackFor Exception class). Calls findAndVerifyActor. Validates status==STARTED; throws BusinessValidationException("Volunteer must be in STARTED status before completion. ") Sets status COMPLETED, hoursLogged hours Saves and returns mapped dto.
+rejectEnrollment (Long enrollmentid, SystemUser actor)
+@Transactional(rollbackFor Exception class) Calls findAndVerifyActor. Validates status==PENDING, throws Business ValidationException("Only PENDING enrollments can be rejected.") Decrements opportunity enrolled Count by 1 (minimum 0). Sets status REJECTED Saves and returns mapped dto
+getAllEnrollments (Pageable pageable) @Transactional(readOnly=true). Returns enrollmentRepository findAll(pageable) map(this map ToResponseDto).
+getEnrollmentsByVolunteer (Long volunteerld. Pageable pageable) -@Transactional(readOnly=true) Returns findByVolunteerld(volunteerld. pageable).map(this map ToResponseDto).
+getEnrollmentsByOrganization(Long orgid, Pageable pageable)-@Transactional(readOnly-true) Returns findByOrganizationld(orgld. pageable) map(this map ToResponseDto)
+ 
+ImpactReportService
+submitReport(Long volunteerld, ImpactReportRequestDto dto) - Loads enrollment via findById(dto.getEnrollmentId()); throws ResourceNotFoundException. Validates enrollment.volunteer.id=volunteerld; throws BusinessValidationException("You can only submit impact reports for your own enrollments"). Validates enrollment.status==COMPLETED; throws Business ValidationException("Impact reports can only be submitted for COMPLETED enrollments. Current status: " + enrollment.getStatus()). Checks existsByEnrollmentId(); throws Business ValidationException("An impact report has already been submitted for this enrollment"). Validates dto hoursContributed <= enrollment.hoursLogged 1.5; throws BusinessValidationException("Reported hours (" + dto.getHoursContributed() + ") significantly exceed logged hours (" + enrollment.getHours Logged() + "). Please verify your hours."). Builds ImpactReport with enrollment, volunteer enrollment getVolunteer(), summary, hoursContributed, beneficiaries Served, rating. Saves and returns mapped ImpactReportResponseDto.
+getVolunteerImpactSummary(Long volunteerld)@Transactional(readOnly=true) Queries sumHours ContributedByVolunteerld, sumBeneficiaries ServedByVolunteerld avgRating ByVolunteerld, and report count via findByVolunteerld(volunteerld) size() Returns Impact SummaryDto with totalHoursContnbuted, total Beneficianes Served average Rating totalReports
+ 
+getOrganizationImpactSummary(Long orgld)@Transactional(readOnly=true). Queries
+sumHours ContributedByOrganizationld, sumBeneficiaries Served By Organizationld, countByOrganizationld. Returns ImpactSummaryDto with averageRating=0.0.
+getAllReports(Pageable pageable) - @Transactional (readOnly=true). Returns impactReportRepository findAll(pageable) map(this map ToResponseDto).
+getReportsByVolunteer(Long volunteerld, Pageable pageable) -@Transactional(readOnly=true). Returns findByVolunteerld(volunteerld, pageable).map(this map ToResponseDto)
+getReportsByOrganization (Long orgld) - @Transactional(readOnly=true). Returns findByOrganizationld(orgld) mapped to dto list.
+getReportById(Long id)@Transactional(readOnly=true). Loads report, throws ResourceNotFoundException. Returns mapped dto.
+ 
+Dashboard Service
+getPlatformStats()@Transactional(readOnly=true) Aggregates across all repositories
+totalVolunteers (countByRole(VOLUNTEER)), totalOrganizations (count()).
+total Opportunities (count()). total Enrollments (count()), pendingOrganizations
+(countByStatus(PENDING)), approved Organizations (countByStatus(APPROVED)). open Opportunities (countByStatus(OPEN)), pendingEnrollments
+(countByStatus(PENDING)) approvedEnrollments (countByStatus(APPROVED)). completedEnrollments (countByStatus (COMPLETED)), rejectedEnrollments
+(countByStatus(REJECTED)), totallmpactReports (count()) Returns Dashboard StatsDto
+ 
+ 
+UserService
+getAllUsers()@Transactional(readOnly=true). Returns all users from userRepository.findAll() mapped to UserResponseDto list.
+updateStatus(Long id, String statusStr) - @Transactional. Loads user, throws ResourceNotFoundException. Sets status via SystemUser. UserStatus.valueOf(statusStr.toUpperCase()). Saves and returns mapped dto.
+assignOrganization(Long userld, Long orgid) - @Transactional. Loads user, throws ResourceNotFoundException("User", userld). Loads organization; throws ResourceNotFoundException("Organization", orgld). Sets user.organization=org. Saves and returns mapped dto.
+ 
+Controller Layer
+AuthController (/api/auth)
+POST/api/auth/register (PUBLIC) Accepts @Valid @RequestBody RegisterDto. Returns ResponseEntity<AuthResponseDto> HTTP 201 (CREATED).
+POST/api/auth/login - (PUBLIC) Accepts @Valid @RequestBody AuthRequestDto. Returns ResponseEntity<AuthResponseDto> HTTP 200.
+POST/api/auth/refresh-(PUBLIC) Accepts @RequestBody Refresh Token RequestDto. Returns Response Entity<AuthResponseDto> HTTP 200
+OrganizationController (/api/organizations)
+GET/api/organizations @PreAuthorize(hasAnyRole(PLATFORM_ADMIN, ORGANIZATION_COORDINATOR, VOLUNTEER)). Accepts @RequestParam page (default 0), size (default 10). Returns ResponseEntity<Page<OrganizationResponseDto>> sorted by createdAt descending.
+GET/api/organizations/(id)@PreAuthorize(hasAnyRole (PLATFORM_ADMIN, ORGANIZATION_COORDINATOR, VOLUNTEER)). Returns Response Entity<OrganizationResponseDto> HTTP 200.
+GET/api/organizations/coordinator/(coordinatorid) -@PreAuthorize(hasAnyRole(PLATFORM_ADMIN, ORGANIZATION_COORDINATOR)). Returns ResponseEntity<List<OrganizationResponseDto>>
+POST/api/organizations @PreAuthorize(hasAnyRole(PLATFORM_ADMIN, ORGANIZATION COORDINATOR)) Accepts @Valid @RequestBody OrganizationRequestDto. Returns ResponseEntity<OrganizationResponseDto> HTTP 201
+PUT/api/organizations/(id)@PreAuthorize(hasAnyRole(PLATFORM_ADMIN ORGANIZATION COORDINATOR)) Accepts @Valid @RequestBody OrganizationRequestDto Returns ResponseEntity <OrganizationResponseDto> HTTP 200
+PATCH/api/organizations/(id)/approve -@PreAuthorize(has Role(PLATFORM_ADMIN)) Returns
+ResponseEntity<OrganizationResponseDto> HTTP 200
+PATCH/api/organizations/(id)/suspend@PreAuthorize(has Role(PLATFORM_ADMIN)) Returns ResponseEntity<OrganizationResponseDto> HTTP 200
+DELETE/api/organizations (id)@PreAuthonze(has Role(PLATFORM_ADMIN)) Returns ResponseEntity<Void> HTTP 204 (No Content)
+ 
+OpportunityController (/api/opportunities)
+GET/api/opportunities - Authenticated (no @PreAuthorize). Accepts @RequestParam page (default 0), size (default 10). Returns Response Entity<Page<Opportunity ResponseDto>> sorted by createdAt descending.
+GET/api/opportunities/(id) - Authenticated. Returns Response Entity <Opportunity ResponseDto> HTTP 200.
+GET/api/opportunities/organization/(orgid) - Authenticated, Retums ResponseEntity<List<Opportunity ResponseDto>>
+POST/api/opportunities @PreAuthorize(hasAnyRole(PLATFORM_ADMIN, ORGANIZATION_COORDINATOR)) Accepts @Authentication Principal Object principal and @Valid @RequestBody OpportunityRequestDto Returns ResponseEntity<Opportunity ResponseDto> HTTP 201. Throws Business ValidationException("Authentication required to create opportunities ") if principal resolves to null.
+PUT/api/opportunities (id)@PreAuthorize(hasAnyRole(PLATFORM_ADMIN, ORGANIZATION_COORDINATOR)) Accepts @Authentication Principal, @PathVariable id, @Valid @RequestBody. Returns ResponseEntity <Opportunity ResponseDto> HTTP 200
+DELETE /api/opportunities (id)@PreAuthorize(hasAnyRole(PLATFORM_ADMIN, ORGANIZATION COORDINATOR)) Returns Response Entity <Void> HTTP 204
+PATCH/api/opportunities/{id}/publish-@PreAuthorize(hasAnyRole(PLATFORM_ADMIN, ORGANIZATION_COORDINATOR)). Returns Response Entity <Opportunity ResponseDto>.
+PATCH/api/opportunities/{id}/close-@PreAuthorize(hasAnyRole(PLATFORM_ADMIN, ORGANIZATION_COORDINATOR)). Returns Response Entity<Opportunity ResponseDto>
+PATCH/api/opportunities/{id}/complete -@PreAuthorize(hasAnyRole(PLATFORM_ADMIN, ORGANIZATION_COORDINATOR)) Returns ResponseEntity <Opportunity ResponseDto>
+Opportunity Controller injects Opportunity Service and SystemUserRepository Its constructor takes both as parameters Private helper getAttachedUser(Object principal) casts principal to SystemUser and reloads via userRepository findById() to ensure an attached JPA entity
+ 
+EnrollmentController (/api/enrollments)
+GET/api/enrollments - @PreAuthorize(has Role(PLATFORM_ADMIN)). Accepts @RequestParam page, size. Returns
+ResponseEntity<Page<EnrollmentResponseDto>> sorted by enrolledAt descending.
+GET/api/enrollments/my-@PreAuthorize(hasRole(VOLUNTEER)). Accepts @Authentication Principal. Throws BusinessValidationException("You must be logged in as a volunteer to view your enrollments.") if principal resolves to null. Returns ResponseEntity<Page<EnrollmentResponseDto>> for the authenticated volunteer.
+GET/api/enrollments/organization/(orgld) -
+@PreAuthorize(hasAnyRole(PLATFORM_ADMIN,
+ORGANIZATION_COORDINATOR)). Returns
+ResponseEntity<Page<EnrollmentResponseDto>>
+POST/api/enrollments/enroll@PreAuthorize(has Role(VOLUNTEER)). Accepts @Authentication Principal and @Valid @RequestBody EnrollmentRequestDto. Returns ResponseEntity <EnrollmentResponseDto> HTTP 201.
+PATCH/api/enrollments/{id}/approve -@PreAuthorize(hasAnyRole(PLATFORM_ADMIN, ORGANIZATION_COORDINATOR)). Accepts @Authentication Principal and @PathVariable id. Returns ResponseEntity<EnrollmentResponseDto> HTTP 200.
+PATCH/api/enrollments/{id}/reject @PreAuthorize(hasAnyRole(PLATFORM_ADMIN, ORGANIZATION_COORDINATOR)). Returns Response Entity<EnrollmentResponseDto> HTTP 200.
+PATCH/api/enrollments/(id)/complete -@PreAuthorize(hasAnyRole(PLATFORM_ADMIN, ORGANIZATION_COORDINATOR)). Accepts @RequestParam hours (Double). Returns ResponseEntity <EnrollmentResponseDto>.
+PATCH/api/enrollments/(id)/check-in @PreAuthorize(hasAnyRole(VOLUNTEER ORGANIZATION_COORDINATOR, PLATFORM_ADMIN)). Returns Response Entity <EnrollmentResponseDto>.
+ 
+ImpactReportController (/api/impact-reports)
+GET/api/impact-reports @PreAuthorize(has Role(PLATFORM_ADMIN)). Accepts @RequestParam page, size. Returns ResponseEntity<Page<ImpactReportResponseDto>> sorted by submittedAt descending.
+GET/api/impact-reports/my@PreAuthorize(hasRole(VOLUNTEER)). Accepts @Authentication Principal. Returns
+ResponseEntity<Page<ImpactReportResponseDto>> for the authenticated volunteer.
+GET/api/impact-reports/organization/(orgld) -@PreAuthorize(hasAnyRole(PLATFORM_ADMIN, ORGANIZATION_COORDINATOR)). Returns
+ResponseEntity<List<ImpactReportResponseDto>>.
+POST/api/impact-reports @PreAuthorize(has Role (VOLUNTEER)). Accepts @Authentication Principal and @Valid @RequestBody ImpactReportRequestDto. Returns ResponseEntity<ImpactReportResponseDto> HTTP 201.
+GET/api/impact-reports/volunteer/(volunteerld)/summary -@PreAuthorize(hasAnyRole(PLATFORM_ADMIN, VOLUNTEER)). Returns Response Entity<ImpactSummaryDto>
+GET/api/impact-reports/organization/(orgld)/summary -@PreAuthorize(hasAnyRole(PLATFORM_ADMIN, ORGANIZATION COORDINATOR)). Returns Response Entity<ImpactSummary Dto>
+ 
+DashboardController (/api/dashboard)
+GET/api/dashboard/stats@PreAuthorize(has Role(PLATFORM_ADMIN)).
+Returns ResponseEntity<DashboardStatsDto> HTTP 200.
+UserController (/api/users)
+Class-level @PreAuthorize(has Role(PLATFORM_ADMIN)).
+GET /api/users - Returns ResponseEntity<List<UserResponseDto>> HTTP 200
+PATCH/api/users/(id)/status - Accepts @RequestBody Map<String, String>
+payload Reads payload get("status") Returns Response Entity <UserResponseDto> HTTP 200
+PATCH/api/users/(id)/assign-organization (orgid)-Returns Response Entity<UserResponseDto> HTTP 200
+ 
+Security Implementation
+JWT signing algorithm: HS256
+JwtService class location: com.example.demo.security.JwtService (annotated @Service). This is the class used by JwtAuthenticationFilter.
+JwtService field: secretKey - private String, injected via @Value("${jwt.secret)"). Decoded via Base64.getDecoder().decode(secretKey).
+JwtService field: accessTokenExpiration - private long, injected via @Value("${jwt.access-token-expiration)").
+JwtService field: refresh TokenExpiration private long, injected via @Value("${jwt.refresh-token-expiration)").
+JwtService method: generateAccess Token (SystemUser user) - adds extra claims. role=user.getRole().name(), userid=user.getId(), fullName=user.getFullName(). Calls build Token with access TokenExpiration.
+JwtService method: generate Refresh Token (SystemUser user) - adds extra claims role=user.getRole() name(), token Type="REFRESH". Calls buildToken with refresh TokenExpiration.
+JwtService private build Token(Map<String, Object> extraClaims, String subject, long expiration) builds JWT via Jwts builder(), sets claims, subject, issuedAt, expiration signs with Jwts SIG HS256 and getSigningKey()
+JwtService method is TokenValid(String token, String username) - returns (extractUsername(token) equals(username)) && lis TokenExpired(token).
+JwtService method: extractUsername(String token) extracts Claims getSubject
+JwtService method: extractRole(String token) extracts claims get("role", String class)
+JwtService method is TokenExpired(String token) - returns extractExpiration(token) before(new Date())
+JwtService private getSigningKey()-returns Keys hmacShakeyFor (Base64 getDecoder() decode(secretKey))
+ 
+SecurityConfig annotated @Configuration, @EnableWebSecurity, @EnableMethod Security.
+securityFilterChain @Bean: disables CSRF, sets
+SessionCreation Policy STATELESS, permits/api/auth/** and OPTIONS/**, authenticates all other requests, adds JwtAuthenticationFilter before
+Username PasswordAuthenticationFilter.
+corsConfigurationSource(): allows origins ["http://localhost:3000"], methods [GET, POST, PUT, PATCH, DELETE, OPTIONS], headers [Authorization, Content-Type, X-Requested-With], exposed headers [Authorization), allowCredentials=true.
+passwordEncoder @Bean returns BCryptPasswordEncoder()
+authenticationManager @Bean returns config getAuthenticationManager()
+JwtAuthenticationFilter extends OncePerRequestFilter with @Component Dependencies JwtService and SystemUserRepository injected via constructor Extracts Bearer token from Authorization header If usemame non-null and SecurityContext has no existing authentication loads Optional<SystemUser> via findByUsername (username) If user present and is TokenValid(jwt username) checks user getisActive() if false returns HTTP 403 with JSON body ("error" "Account is deactivated") Otherwise builds Username PasswordAuthentication Token with authonty 'ROLE user getRole() name(), sets WebAuthenticationDetails Source details and sets authentication in SecurityContextHolder
+ 
+DataSeeder (CommandLineRunner) - seeds only when userRepository.count() == 0:
+"admin" email: admin@volunteerview.com, password: admin123 (BCrypt), role: PLATFORM_ADMIN, status: APPROVED, isActive: true.
+"coordinator" - email: coordinator@example.com, password: password123, role: ORGANIZATION_COORDINATOR, status: APPROVED. Linked to organization "Helping Hands" (mission: "A non-profit organization helping the community.".
+address: "123 Main St", contactEmail: contact@helpinghands.org).
+"coordinator2" - email: coord2@example.com, password: password123, role: ORGANIZATION_COORDINATOR Linked to organization "Green Peace" (mission: "Protecting the environment and promoting peace.", address: "456 Earth Way").
+"coordinator3" - email: coord3@example.com, password: password123, role: ORGANIZATION_COORDINATOR. Linked to organization "Safe Haven Animal Shelter" (mission: "Rescuing and rehoming abandoned animals.", address: "789 Pet Lane").
+"volunteer" - email, volunteer@example.com, password: password123, role: VOLUNTEER, status: APPROVED. Six opportunities seeded (Food Drive, Tree Planting. Beach Cleanup, Tutoring Kids, Animal Shelter Help, Elderly Care) with one enrollment per opportunity covering all six Enrollment Status values. PENDING. APPROVED, STARTED, COMPLETED, REJECTED, CANCELLED
+ 
+Exception Handling
+Required Package: com.example.demo.exception
+The central handler class is GlobalExceptionHandler, annotated with @RestControllerAdvice. All handlers return ResponseEntity<Map<String, Object>> with standard keys: timestamp (LocalDateTime.now().toString()), status (int HTTP code), error (String label), type (exception class simple name), message or fieldErrors.
+ResourceNotFoundException handleResourceNotFound() returns HTTP 404 NOT_FOUND. Body timestamp, status=404, error="Not Found", type, message.
+BusinessValidationException handleBusinessValidation() returns HTTP 400
+BAD_REQUEST. Body: timestamp, status=400, error="Business Validation Error", type, message.
+MethodArgumentNotValidException - handle ValidationErrors() returns HTTP 400
+BAD_REQUEST. Body: timestamp, status=400, error="Validation Failed", type, fieldErrors (Map<String, String> of fieldName defaultMessage per FieldError).
+IllegalArgumentException- handlelllegalArgument() returns HTTP 400 BAD_REQUEST. Body: timestamp, status=400, error="Bad Request", type, message.
+Exception - handle GenericException() returns HTTP 500
+INTERNAL_SERVER_ERROR. Body: timestamp, status=500, error="Internal Server Error", type, message (defaults to "An unexpected error occurred" if ex.getMessage() is null).
+ 
+Data Transfer Objects (DTOS)
+AuthRequestDto
+Fields: username (String @NotBlank(message="Username is required")), password (String @NotBlank(message="Password is required")). Annotated @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder.
+AuthResponseDto
+Fields accessToken (String) refresh Token (String) username (String), fullName (String). role (String), status (String), userid (Long), organizationid (Long), organizationName (String) Annotated Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
+RegisterDto
+Fields: username (String @NotBlank @Size(min=3,max=50)), email (String @NotBlank @Email), password (String @NotBlank @Size(min=6,max=100)), fullName (String @NotBlank ( mathfrak Q Size (max = 100) ) phoneNumber (String @Size(max=20)), role (String @NotBlank). Annotated @Getter @Setter @NoArgsConstructor @AliArgsConstructor @Builder.
+Refresh TokenRequestDto
+Fields refresh Token (String) Annotated @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
+OrganizationRequestDto
+Fields name (String @NotBlank (a)Size (max = 150) ) mission (String @NotBlank), address (String @NotBlank @Size(max=255)), contactEmail (String @NotBlank @Email), contactPhone (String @Size(max 20)) foundedYear (Integer @Min(1800) @Max(2100)). coordinatorld (Long). Annotated @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
+OpportunityRequestDto
+Fields: title (String @NotBlank @Size (max = 200) ) description (String @NotBlank), location (String @NotBlank (QSize (max = 255) ) category (String (QSuze (max = 50) ) scheduledDate (String @NotBlank, format "YYYY-MM-DD"), startTime (String @NotBlank, format "HH:mm"), endTime (String @NotBlank, format "HH:mm"), maxCapacity (Integer @NotNull @Min(1)), requiredSkills (String (QSue (max = 500) ) organizationld (Long @NotNull). Annotated @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder.
+Opportunity ResponseDto
+Fields id (Long), title (String), description (String), location (String), category (String). scheduledDate (LocalDate), startTime (LocalTime), endTime (LocalTime), maxCapacity (Integer), enrolled Count (Integer), requiredSkills (String), status (String), organizationld (Long), organization Name (String), is Enrolled (boolean), createdAt (LocalDate Time), updatedAt (Local Date Time) Annotated @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
+EnrollmentRequestDto
+Fields opportunityld (Long @NotNull(message="Opportunity ID is required")), notes (String @Size(max=500)), hoursLogged (Double). Annotated @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
+EnrollmentResponse Dto
+Fields id (Long) volunteerld (Long) volunteerName (String), opportunityld (Long). opportunity Titie (String), organizationName (String) status (String), enrolledAt (LocalDate Time) approvedAt (Local Date Time), hourst.ogged (Double), notes (String) Annotated @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
+ 
+ImpactReportRequestDto
+Fields: enrollmentid (Long @NotNull), summary (String @NotBlank), hours Contributed (Double @NotNull @DecimalMin("0.5")), beneficiariesServed (Integer @NotNull @Min(0)), rating (Integer @NotNull @Min(1) @Max(5)). Annotated @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder.
+ImpactReportResponseDto
+Fields: id (Long), enrollmentid (Long), volunteerld (Long), volunteerName (String), opportunity Title (String), organizationName (String), summary (String), hoursContributed
+(Double), beneficiaries Served (Integer), rating (Integer), submittedAt (Local Date Time) Annotated @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder.
+Impact SummaryDto
+Fields totalHours Contributed (Double), total Beneficiaries Served (Integer), averageRating (Double), totalReports (Long). Annotated @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
+Dashboard StatsDto
+Fields: totalVolunteers (long), total Organizations (long), total Opportunities (long), totalEnrollments (long), pendingOrganizations (long), approved Organizations (long), openOpportunities (long), pendingEnrollments (long), approvedEnrollments (long), completedEnrollments (long), rejectedEnrollments (long), totallmpactReports (long). Annotated @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder.
+UserResponseDto
+Fields: id (Long), username (String), email (String), fullName (String), phoneNumber (String), role (String), status (String), organizationld (Long), organizationName (String), createdAt (LocalDateTime). Annotated @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder.
+ 
+API Endpoints
+Authentication
+POST/api/auth/register- PUBLIC - Response Entity <AuthResponseDto> HTTP 201
+POST/api/auth/login-PUBLIC-Response Entity<AuthResponseDto> HTTP 200
+POST/api/auth/refresh- PUBLIC - Response Entity<AuthResponseDto> HTTP 200
+Organizations
+GET/api/organizations - PLATFORM_ADMIN/ORGANIZATION_COORDINATOR/VOLUNTEER - Response Entity<Page<OrganizationResponseDto>>
+GET/api/organizations/(id) - PLATFORM_ADMIN/ORGANIZATION_COORDINATOR/VOLUNTEER Response Entity<OrganizationResponseDto>
+GET/api/organizations/coordinator/(coordinatorld) - PLATFORM_ADMIN/ORGANIZATION_COORDINATOR -Response Entity <List<OrganizationResponseDto>>
+POST/api/organizations PLATFORM_ADMIN/ORGANIZATION_COORDINATOR - Response Entity<OrganizationResponseDto> HTTP 201
+PUT/api/organizations/{id}-PLATFORM_ADMIN/
+ORGANIZATION_COORDINATOR - Response Entity<OrganizationResponseDto>
+PATCH/api/organizations/{id}/approve PLATFORM_ADMIN ResponseEntity<OrganizationResponseDto>
+PATCH/api/organizations/{id}/suspend - PLATFORM_ADMIN -ResponseEntity<OrganizationResponseDto>
+DELETE/api/organizations/(id) - PLATFORM_ADMIN - ResponseEntity<Void>
+HTTP 204
+ 
+Opportunities.
+GET/api/opportunities Authenticated -Response Entity<Page<Opportunity Response Dto>>
+GET/api/opportunities/(id) - Authenticated -ResponseEntity<Opportunity ResponseDto>
+GET/api/opportunities/organization/(orgld)-Authenticated -ResponseEntity<List<Opportunity ResponseDto>>
+POST/api/opportunities - PLATFORM_ADMIN/ORGANIZATION_COORDINATOR -ResponseEntity <Opportunity ResponseDto> HTTP 201
+PUT/api/opportunities (id) - PLATFORM_ADMIN/
+ORGANIZATION_COORDINATOR-Response Entity<OpportunityResponseDto>
+DELETE/api/opportunities/(id) - PLATFORM_ADMIN/ORGANIZATION_COORDINATOR- Response Entity<Void> HTTP 204
+. PATCH /api/opportunities/(id)/publish - PLATFORM_ADMIN/ORGANIZATION_COORDINATOR- ResponseEntity <Opportunity ResponseDto>
+PATCH /api/opportunities/(id)/close PLATFORM_ADMIN/
+ORGANIZATION_COORDINATOR Response Entity<Opportunity ResponseDto>
+PATCH /api/opportunities (id)/complete PLATFORM_ADMIN/ORGANIZATION_COORDINATOR Response Entity <Opportunity ResponseDto>
+ 
+ 
+ 
+Enrollments
+GET/api/enrollments - PLATFORM_ADMIN-ResponseEntity<Page<EnrollmentResponseDto>>
+GET/api/enrollments/my- VOLUNTEER-ResponseEntity<Page<EnrollmentResponseDto>>
+GET/api/enrollments/organization/orgId}-PLATFORM_ADMIN/ORGANIZATION_COORDINATOR ResponseEntity<Page<Enrollment Response Dto>>
+POST/api/enrollments/enroll-VOLUNTEER-Response Entity<EnrollmentResponseDto> HTTP 201
+PATCH/api/enrollments/(id)/approve - PLATFORM_ADMIN/ORGANIZATION_COORDINATOR - Response Entity<EnrollmentResponseDto>
+PATCH/api/enrollments/(id)/reject - PLATFORM_ADMIN/ORGANIZATION_COORDINATOR - Response Entity<EnrollmentResponseDto>
+PATCH/api/enrollments/(id)/complete - PLATFORM_ADMIN/ORGANIZATION_COORDINATOR - ResponseEntity<EnrollmentResponse Dto>
+PATCH/api/enrollments/{id}/check-in VOLUNTEER/ORGANIZATION_COORDINATOR/PLATFORM ADMIN -ResponseEntity<EnrollmentResponseDto>
+Impact Reports
+GET/api/impact-reports PLATFORM_ADMIN -ResponseEntity<Page<ImpactReportResponseDto>>
+GET/api/impact-reports/my-VOLUNTEER -ResponseEntity<Page<ImpactReportResponseDto>>
+GET/api/impact-reports/organization/(orgld)- PLATFORM_ADMIN/ORGANIZATION_COORDINATOR ResponseEntity<List<ImpactReportResponseDto>>
+POST/api/impact-reports - VOLUNTEER -ResponseEntity<ImpactReportResponseDto> HTTP 201
+GET/api/impact-reports/volunteer/(volunteerld)/summary - PLATFORM_ADMIN/VOLUNTEER - Response Entity<ImpactSummaryDto>
+. GET/api/impact-reports/organization/(orgld)/summary - PLATFORM_ADMIN/ORGANIZATION_COORDINATOR - ResponseEntity<ImpactSummaryDto>
+Dashboard
+GET/api/dashboard/stats - PLATFORM_ADMIN-Response Entity<DashboardStatsDto>
+Users
+GET/api/users - PLATFORM_ADMIN-Response Entity<List<UserResponseDto>>
+PATCH/api/users/(id)/status- PLATFORM_ADMIN -Response Entity<UserResponseDto>
+PATCH/api/users/(id)/assign-organization/(orgld) - PLATFORM_ADMIN -Response Entity<UserResponseDto>
+ 
+ 
+ 

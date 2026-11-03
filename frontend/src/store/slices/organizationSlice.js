@@ -49,6 +49,18 @@ export const approveOrganization = createAsyncThunk(
   }
 );
 
+export const deleteOrganization = createAsyncThunk(
+  'organizations/deleteOrganization',
+  async (id, { rejectWithValue }) => {
+    try {
+      await organizationService.delete(id);
+      return id;
+    } catch (err) {
+      return rejectWithValue(err.response?.data || { message: err.message });
+    }
+  }
+);
+
 const initialState = {
   items: [],
   selectedItem: null,
@@ -93,6 +105,9 @@ const organizationSlice = createSlice({
         if (index !== -1) {
           state.items[index] = action.payload;
         }
+      })
+      .addCase(deleteOrganization.fulfilled, (state, action) => {
+        state.items = state.items.filter((org) => org.id !== action.payload);
       });
   },
 });

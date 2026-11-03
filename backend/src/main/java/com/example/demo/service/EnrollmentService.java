@@ -127,18 +127,9 @@ public EnrollmentResponseDto enrollVolunteer(
 
     if (actor.getRole() == Role.ORGANIZATION_COORDINATOR) {
 
-        if (actor.getOrganization() == null) {
-
-            throw new BusinessValidationException(
-                    "You are not assigned to any organization."
-            );
-
-        }
-
-        if (!actor.getOrganization().getId().equals(
-                enrollment.getOpportunity()
-                        .getOrganization()
-                        .getId())) {
+        if (enrollment.getOpportunity().getOrganization().getCoordinator() == null
+                || !enrollment.getOpportunity().getOrganization().getCoordinator().getId()
+                .equals(actor.getId())) {
 
             throw new BusinessValidationException(
                     "Access Denied: You can only manage enrollments for your assigned organization."

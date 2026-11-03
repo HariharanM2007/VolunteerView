@@ -14,7 +14,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import com.example.demo.entity.SystemUser;
 
 @RestController
 @RequestMapping("/api/organizations")
@@ -31,12 +33,14 @@ public class OrganizationController {
         @Valid
         @RequestBody OrganizationRequestDto dto
 
+        , @AuthenticationPrincipal SystemUser actor
+
     ) {
 
     return ResponseEntity
             .status(HttpStatus.CREATED)
             .body(
-                    organizationService.createOrganization(dto)
+                    organizationService.createOrganization(dto, actor)
             );
 
     }
@@ -50,10 +54,12 @@ public class OrganizationController {
         @Valid
         @RequestBody OrganizationRequestDto dto
 
+        , @AuthenticationPrincipal SystemUser actor
+
     ) {
 
     return ResponseEntity.ok(
-            organizationService.updateOrganization(id, dto)
+            organizationService.updateOrganization(id, dto, actor)
     );
 
     }
